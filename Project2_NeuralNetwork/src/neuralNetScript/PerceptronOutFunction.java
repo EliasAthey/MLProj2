@@ -10,7 +10,7 @@ package neuralNetScript;
 class PerceptronOutFunction implements INodeFunction {
 
 	@Override
-	public Float computeOutput(Float weightedSum, Float[] args) {
+	public Float computeOutput(Float weightedSum) {
 		float out = (float)(1/(1+(Math.exp(-weightedSum))));
 		return out;
 	}

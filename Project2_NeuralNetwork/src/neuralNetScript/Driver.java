@@ -20,9 +20,9 @@ public class Driver {
 	public static void main(String args[]){
 		// TODO
 		// Input will receive:
-		// 				./script <netType> <numIn>-<numHidden>-...-<numHidden>-<numOut>
+		// 				./script <netType> <numIn>-<numHidden>-...-<numHidden>-<numOut> [<other-args>]
 		// For example: ./script mlp 3-4-3-1
-		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers
+		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -32,8 +32,21 @@ public class Driver {
 	}
 	
 	// create Node objects and set downstream attribute for each
-	private void buildNetwork(){
+	private void buildNetwork(String networkType) throws Exception{
 		// TODO
+		switch(networkType){
+			case "rbf":
+				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
+				// create output node
+				// create hidden nodes, set downstream to output, set each associatedCluster
+				// create input nodes, set the input, set downstream to all nodes in hidden layer
+				// set the sigma value for RadialBasisFunction to whatever we want
+				RadialBasisFunction.setSigma(2.5f);
+				break;
+			case "mlp":
+				break;
+			default: throw new Exception("The specified network type is not defined.");
+		}
 	}
 	
 	// input training data into the network, update weights until convergence

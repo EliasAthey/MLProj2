@@ -3,8 +3,6 @@
  */
 package neuralNetScript;
 
-import java.util.Map;
-
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
  *
@@ -15,10 +13,13 @@ class Node {
 	private IWeightFunction weightFunction;
 	
 	// attributes
-	Float[][] inputs;
 	private Node[] downstream;
 	private Float deltaValue;
 	private Float computedOutput;
+
+	// first dimension contains all the input values
+	// second dimension contains their associated weights
+	Float[][] inputs;
 	
 	// constructor
 	public Node(INodeFunction nodeFunction, IWeightFunction weightFunction, Node[] downstreamNodes){
@@ -35,16 +36,13 @@ class Node {
 			sum += (inputs[i][0] * inputs[i][1]);
 		}
 		
-		// extra args will be passed to the nodeFunction
-		Float[] args = {};
-		computedOutput = nodeFunction.computeOutput(sum, args);
+		computedOutput = nodeFunction.computeOutput(sum);
 	}
 	
 	// call the weightFunction
 	public void updateWeights(){
 		// TODO
-		Float[] args = {1.0f};// args will be passed to the weightFunction, not sure if we'll need to pass it anything
-		weightFunction.computeWeights(args);
+		weightFunction.computeWeights();
 	}
 	
 	// return the set of downstream Nodes

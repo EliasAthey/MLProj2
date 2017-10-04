@@ -8,5 +8,5 @@ package neuralNetScript;
  *
  */
 interface IWeightFunction {
-	Float computeWeights(Float args[]);
+	Float computeWeights();
 }

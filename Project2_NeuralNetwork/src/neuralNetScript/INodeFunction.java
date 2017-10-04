@@ -8,5 +8,5 @@ package neuralNetScript;
  *
  */
 interface INodeFunction {
-	Float computeOutput(Float weightedSum, Float args[]);
+	Float computeOutput(Float weightedSum);
 }

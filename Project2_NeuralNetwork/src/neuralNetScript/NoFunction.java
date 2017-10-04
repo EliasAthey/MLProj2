@@ -11,7 +11,8 @@ class NoFunction implements INodeFunction {
 
 	@Override
 	public Float computeOutput(Float args[]) {
-		// TODO Auto-generated method stub
+		//if this class is just going to return the sum of args[] we can just use the 
+		//RadialBasisOutFunction
 		return null;
 	}
 

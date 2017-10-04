@@ -15,16 +15,29 @@ class Node {
 	private IWeightFunction weightFunction;
 	
 	// attributes
-	Map<Float, Float> inputs;//Key: input value, Value: input weight
+	Float[][] inputs;
 	private Node[] downstream;
 	private Float deltaValue;
 	private Float computedOutput;
 	
-	// collect weighted inputs and send to nodeFunction
+	// constructor
+	public Node(INodeFunction nodeFunction, IWeightFunction weightFunction, Node[] downstreamNodes){
+		this.nodeFunction = nodeFunction;
+		this.weightFunction = weightFunction;
+		this.downstream = downstreamNodes;
+	}
+	
+	// sum weighted inputs and send to nodeFunction
 	public void execute(){
-		// TODO
-		Float[] args = {1.0f};// args will be passed to the nodeFunction
-		computedOutput = nodeFunction.computeOutput(args);
+		// sum weighted inputs
+		Float sum = null;
+		for (int i = 0; i < inputs.length; i++) {
+			sum += (inputs[i][0] * inputs[i][1]);
+		}
+		
+		// extra args will be passed to the nodeFunction
+		Float[] args = {};
+		computedOutput = nodeFunction.computeOutput(sum, args);
 	}
 	
 	// call the weightFunction

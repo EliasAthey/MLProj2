@@ -10,7 +10,7 @@ package neuralNetScript;
 class LinearFunction implements INodeFunction {
 
 	@Override
-	public Float computeOutput(Float args[]) {
+	public Float computeOutput(Float weightedSum, Float args[]) {
 		// TODO Auto-generated method stub
 		return null;
 	}

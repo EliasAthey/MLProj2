@@ -104,9 +104,25 @@ public class Driver {
 						// set the node functions for hidden nodes
 						if(i == hiddenLayers.length){
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
+							// initialize input arrays for downstream nodes
+							for(Node outNode : outputNodes){
+								outNode.inputs[0] = new double[hiddenNodes.length];
+								outNode.inputs[1] = new double[hiddenNodes.length];
+								for(double weight : outNode.inputs[1]){
+									weight = Math.random();
+								}
+							}
 						}
 						else{
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
+							// initialize input arrays for downstream nodes
+							for(Node hiddenNode : prevHiddenNodes){
+								hiddenNode.inputs[0] = new double[hiddenNodes.length];
+								hiddenNode.inputs[1] = new double[hiddenNodes.length];
+								for(double weight : hiddenNode.inputs[1]){
+									weight = Math.random();
+								}
+							}
 						}
 					}
 					hiddenLayers[i].setNodes(hiddenNodes);
@@ -118,6 +134,14 @@ public class Driver {
 				for(int i = 0; i < inputNodes.length; i++){
 					// set the node functions for input nodes
 					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
+					// initialize input arrays for downstream nodes
+					for(Node hiddenNode : prevHiddenNodes){
+						hiddenNode.inputs[0] = new double[inputNodes.length];
+						hiddenNode.inputs[1] = new double[inputNodes.length];
+						for(double weight : hiddenNode.inputs[1]){
+							weight = Math.random();
+						}
+					}
 				}
 				inputLayer.setNodes(inputNodes);
 				break;
@@ -160,6 +184,7 @@ public class Driver {
 				}
 			}
 			
+			// check convergence
 			if(Driver.hasConverged()){
 				break;
 			}

@@ -108,8 +108,8 @@ public class Driver {
 							for(Node outNode : outputNodes){
 								outNode.inputs[0] = new double[hiddenNodes.length];
 								outNode.inputs[1] = new double[hiddenNodes.length];
-								for(double weight : outNode.inputs[1]){
-									weight = Math.random();
+								for(int k = 0; k < outNode.inputs[1].length; k++){
+									outNode.inputs[1][k] = Math.random();
 								}
 							}
 						}
@@ -119,8 +119,8 @@ public class Driver {
 							for(Node hiddenNode : prevHiddenNodes){
 								hiddenNode.inputs[0] = new double[hiddenNodes.length];
 								hiddenNode.inputs[1] = new double[hiddenNodes.length];
-								for(double weight : hiddenNode.inputs[1]){
-									weight = Math.random();
+								for(int k = 0; k < hiddenNode.inputs[1].length; k++){
+									hiddenNode.inputs[1][k] = Math.random();
 								}
 							}
 						}
@@ -138,8 +138,8 @@ public class Driver {
 					for(Node hiddenNode : prevHiddenNodes){
 						hiddenNode.inputs[0] = new double[inputNodes.length];
 						hiddenNode.inputs[1] = new double[inputNodes.length];
-						for(double weight : hiddenNode.inputs[1]){
-							weight = Math.random();
+						for(int k = 0; k < hiddenNode.inputs[1].length; k++){
+							hiddenNode.inputs[1][k] = Math.random();
 						}
 					}
 				}
@@ -189,6 +189,8 @@ public class Driver {
 				break;
 			}
 		}
+		
+		// save convergence time
 		Driver.convergenceTime = System.currentTimeMillis() - startTime;
 		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
 	}

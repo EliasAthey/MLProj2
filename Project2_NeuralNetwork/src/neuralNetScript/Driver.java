@@ -26,9 +26,29 @@ public class Driver {
 	}
 	
 	// return a sample dataset of the Rosenbrock function
-	private Float[][] getSample(int size){
-		// TODO
-		return null;
+	private Float[][] getSample(int n){
+
+		double[] inputs = null;
+		int dataSetSize = (int) (Math.pow(n, 1.8)*1000);
+		Float[][] outputs = null;
+		
+		for(int setIter = 0; setIter < dataSetSize; setIter++) {
+			
+			for(int inputIter = 0; n < inputIter; inputIter++ ) {
+				inputs[inputIter] = Math.random();
+			}
+			
+			double sumTotal = 0;
+			
+			for(int sumIter = 0; sumIter < (n-1); sumIter++) {		// summation from 0 to n-1
+				sumTotal = Math.pow((1 - inputs[sumIter]), 2);		// (1-xi)^2
+				sumTotal += (100 * Math.pow( inputs[sumIter + 1] 	// 100 * (x(i+1) -
+							- Math.pow(inputs[sumIter], 2), 2));	// xi^2)^2
+				outputs[setIter][sumIter] = (float)(sumTotal);
+			}
+		}
+		
+		return outputs;
 	}
 	
 	// create Node objects and set downstream attribute for each

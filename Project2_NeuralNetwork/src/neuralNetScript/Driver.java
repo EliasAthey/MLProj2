@@ -3,16 +3,18 @@
  */
 package neuralNetScript;
 
+import java.util.ArrayList;
+
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
  *
  */
 public class Driver {
 	// attributes
-	private String networkType;
-	private int numInNodes;
-	private int[] numHiddenLayers;// length is # of layers, value @ each index is # of nodes in that layer
-	private int numOutNodes;
+	private static String networkType;
+	private static int numInNodes;
+	private static ArrayList<Integer> numHiddenLayers;// length is # of layers, value @ each index is # of nodes in that layer
+	private static int numOutNodes;
 	
 	// the network itself
 	private Layer[] network;
@@ -21,8 +23,14 @@ public class Driver {
 		// TODO
 		// Input will receive:
 		// 				./script <netType> <numIn>-<numHidden>-...-<numHidden>-<numOut> [<other-args>]
-		// For example: ./script mlp 3-4-3-1
+		// For example: ./script mlp 3-5-4-1   
+		//						--or--
 		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
+		
+		Driver.networkType = "mlp";
+		Driver.numInNodes = 3;
+		Driver.numHiddenLayers.add(5);
+		Driver.numHiddenLayers.add(4);
 	}
 	
 	// return a sample dataset of the Rosenbrock function

@@ -13,7 +13,7 @@ public class Driver {
 	// attributes
 	private static String networkType;
 	private static int numInNodes;
-	private static ArrayList<Integer> numHiddenLayers;// length is # of layers, value @ each index is # of nodes in that layer
+	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();// length is # of layers, value @ each index is # of nodes in that layer
 	private static int numOutNodes;
 	
 	// the network itself
@@ -33,16 +33,17 @@ public class Driver {
 		Driver.numHiddenLayers.add(5);
 		Driver.numHiddenLayers.add(4);
 		Driver.numOutNodes = 1;
+		
 	}
 	
 	// return a sample dataset of the Rosenbrock function
-	private Float[][] getSample(int size){
+	private static Float[][] getSample(int size){
 		// TODO
 		return null;
 	}
 	
 	// the Rosenbrock function
-	private double rosenbrock(ArrayList<Double> input) throws Exception{
+	private static double rosenbrock(ArrayList<Double> input) throws Exception{
 		if(input.size() < 2){
 			throw new Exception("Rosenbrock function input must have at least two elements.");
 		}
@@ -51,11 +52,12 @@ public class Driver {
 		for(int i = 0; i < input.size() - 1; i++){
 			output += Math.pow(1 - input.get(i), 2) + (100 * Math.pow(input.get(i + 1) - Math.pow(input.get(i), 2), 2));
 		}
+		
 		return output;
 	}
 	
 	// create Node objects and set downstream attribute for each
-	private void buildNetwork(String networkType) throws Exception{
+	private static void buildNetwork(String networkType) throws Exception{
 		// TODO
 		switch(networkType){
 			case "rbf":
@@ -73,13 +75,13 @@ public class Driver {
 	}
 	
 	// input training data into the network, update weights until convergence
-	private void trainNetwork(){
+	private static void trainNetwork(){
 		// TODO
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
-	private Float testNetwork(Float[] input){
+	private static double testNetwork(double[] input){
 		// TODO
-		return null;
+		return 0;
 	}
 }

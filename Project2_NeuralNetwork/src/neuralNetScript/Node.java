@@ -14,8 +14,8 @@ class Node {
 	
 	// attributes
 	private Node[] downstream;
-	private Float deltaValue;
-	private Float computedOutput;
+	private double deltaValue;
+	private double computedOutput;
 
 	// first dimension contains all the input values
 	// second dimension contains their associated weights
@@ -31,7 +31,7 @@ class Node {
 	// sum weighted inputs and send to nodeFunction
 	public void execute(){
 		// sum weighted inputs
-		Float sum = null;
+		double sum = 0;
 		for (int i = 0; i < inputs.length; i++) {
 			sum += (inputs[i][0] * inputs[i][1]);
 		}
@@ -51,12 +51,12 @@ class Node {
 	}
 	
 	// return the delta value used for backprop weight updating
-	public Float getDeltaValue(){
+	public double getDeltaValue(){
 		return deltaValue;
 	}
 	
 	// return the computed output
-	public Float getComputedOutput(){
+	public double getComputedOutput(){
 		return computedOutput;
 	}
 }

@@ -10,9 +10,9 @@ package neuralNetScript;
 class SigmoidalFunction implements INodeFunction {
 
 	@Override
-	public Float computeOutput(Float weightedSum) {
+	public double computeOutput(double weightedSum) {
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 
 }

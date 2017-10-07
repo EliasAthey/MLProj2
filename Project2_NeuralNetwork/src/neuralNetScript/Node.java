@@ -33,31 +33,31 @@ class Node {
 	public void execute(){
 		// sum weighted inputs
 		double sum = 0;
-		for (int i = 0; i < inputs.length; i++) {
-			sum += (inputs[i][0] * inputs[i][1]);
+		for (int i = 0; i < this.inputs.length; i++) {
+			sum += (this.inputs[i][0] * this.inputs[i][1]);
 		}
 		
-		computedOutput = nodeFunction.computeOutput(sum);
+		this.computedOutput = this.nodeFunction.computeOutput(sum);
 	}
 	
 	// call the weightFunction
 	public void updateWeights(){
 		// TODO
-		weightFunction.computeWeights();
+		this.weightFunction.computeWeights();
 	}
 	
 	// return the set of downstream Nodes
 	public Node[] getDownstream(){
-		return downstream;
+		return this.downstream;
 	}
 	
 	// return the delta value used for backprop weight updating
 	public double getDeltaValue(){
-		return deltaValue;
+		return this.deltaValue;
 	}
 	
 	// return the computed output
 	public double getComputedOutput(){
-		return computedOutput;
+		return this.computedOutput;
 	}
 }

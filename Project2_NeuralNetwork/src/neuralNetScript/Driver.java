@@ -15,9 +15,13 @@ public class Driver {
 	private static int numInNodes;
 	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();// length is # of layers, value @ each index is # of nodes in that layer
 	private static int numOutNodes;
+	private static double convergenceTime;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
+	
+	// package accessible sample expected output
+	static double expectedOutput;
 	
 	public static void main(String args[]){
 		// TODO
@@ -70,10 +74,6 @@ public class Driver {
 				break;
 				
 			case "mlp":
-				// create output node
-				// create hidden layers in reverse, setting the downstream nodes accordingly
-				// create input layer, set downstream nodes to first hidden layer
-				
 				// initialize Layers and network
 				Layer inputLayer = new Layer();
 				Layer[] hiddenLayers = new Layer[Driver.numHiddenLayers.size()];
@@ -130,6 +130,9 @@ public class Driver {
 	private static void trainNetwork(){
 		double[][] sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 		
+		//start timer
+		double startTime = System.currentTimeMillis();
+		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < sample.length; i++){
 			// set inputs for input nodes
@@ -141,7 +144,7 @@ public class Driver {
 			}
 			
 			//set the expected output for this sample point
-			double expectedOutput = sample[i][j];
+			Driver.expectedOutput = sample[i][j];
 			
 			// execute the nodes in the network
 			for(Layer layer : Driver.network){
@@ -156,7 +159,18 @@ public class Driver {
 					node.updateWeights();
 				}
 			}
+			
+			if(Driver.hasConverged()){
+				break;
+			}
 		}
+		Driver.convergenceTime = System.currentTimeMillis() - startTime;
+		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
+	}
+	
+	// checks for weight convergence in the network
+	private static boolean hasConverged(){
+		return false;
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function

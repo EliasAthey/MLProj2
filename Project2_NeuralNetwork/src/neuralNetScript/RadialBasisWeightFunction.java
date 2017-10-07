@@ -9,10 +9,11 @@ package neuralNetScript;
  */
 class RadialBasisWeightFunction implements IWeightFunction {
 
+	private double expectedOutput;
+	
 	@Override
-	public Float computeWeights() {
+	public double computeWeights() {
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
-
 }

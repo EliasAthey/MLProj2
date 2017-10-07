@@ -17,9 +17,10 @@ class Node {
 	private double deltaValue;
 	private double computedOutput;
 
-	// first dimension contains all the input values
-	// second dimension contains their associated weights
-	Float[][] inputs;
+	// inputs is a 2-by-n matrix, where n is the number of inputs
+	// inputs[0][x] contains the x'th input
+	// inputs[1][x] contains the weight associated to x'th input
+	double[][] inputs = new double[2][];
 	
 	// constructor
 	public Node(INodeFunction nodeFunction, IWeightFunction weightFunction, Node[] downstreamNodes){

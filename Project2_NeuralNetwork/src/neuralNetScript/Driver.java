@@ -37,12 +37,13 @@ public class Driver {
 	}
 	
 	// return a sample dataset of the Rosenbrock function
-	private static Float[][] getSample(int size){
+	// [m][n] contains m data points, each with n-1 inputs and 1 output
+	private static double[][] getSample(int size){
 		// TODO
 		return null;
 	}
 	
-	// the Rosenbrock function
+	// the Rosenbrock function accepting at least 2 inputs
 	private static double rosenbrock(ArrayList<Double> input) throws Exception{
 		if(input.size() < 2){
 			throw new Exception("Rosenbrock function input must have at least two elements.");
@@ -127,7 +128,35 @@ public class Driver {
 	
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
-		// TODO
+		double[][] sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
+		
+		// iterate through each sample point or until convergence
+		for(int i = 0; i < sample.length; i++){
+			// set inputs for input nodes
+			int j = 0;
+			while(j < sample[i].length - 1){
+				Driver.network.get(0).getNodes()[j].inputs = new double[2][numInNodes];
+				Driver.network.get(0).getNodes()[j].inputs[0][j] = sample[i][j];
+				j++;
+			}
+			
+			//set the expected output for this sample point
+			double expectedOutput = sample[i][j];
+			
+			// execute the nodes in the network
+			for(Layer layer : Driver.network){
+				for(Node node : layer.getNodes()){
+					node.execute();
+				}
+			}
+			
+			// update the weights in the network
+			for(int k = Driver.network.size() - 1; k >= 0 ; k--){
+				for(Node node : Driver.network.get(k).getNodes()){
+					node.updateWeights();
+				}
+			}
+		}
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function

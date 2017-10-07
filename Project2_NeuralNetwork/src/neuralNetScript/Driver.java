@@ -27,16 +27,31 @@ public class Driver {
 		//						--or--
 		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
 		
+		// these will be set according to the input. Example values for now
 		Driver.networkType = "mlp";
 		Driver.numInNodes = 3;
 		Driver.numHiddenLayers.add(5);
 		Driver.numHiddenLayers.add(4);
+		Driver.numOutNodes = 1;
 	}
 	
 	// return a sample dataset of the Rosenbrock function
 	private Float[][] getSample(int size){
 		// TODO
 		return null;
+	}
+	
+	// the Rosenbrock function
+	private double rosenbrock(ArrayList<Double> input) throws Exception{
+		if(input.size() < 2){
+			throw new Exception("Rosenbrock function input must have at least two elements.");
+		}
+		
+		double output = 0f;
+		for(int i = 0; i < input.size() - 1; i++){
+			output += Math.pow(1 - input.get(i), 2) + (100 * Math.pow(input.get(i + 1) - Math.pow(input.get(i), 2), 2));
+		}
+		return output;
 	}
 	
 	// create Node objects and set downstream attribute for each

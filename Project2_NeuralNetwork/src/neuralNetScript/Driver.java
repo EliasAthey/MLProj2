@@ -16,6 +16,7 @@ public class Driver {
 	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();// length is # of layers, value @ each index is # of nodes in that layer
 	private static int numOutNodes;
 	private static double convergenceTime;
+	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -177,7 +178,14 @@ public class Driver {
 				}
 			}
 			
-			// update the weights in the network
+			// save previous weights and update the weights in the network
+			for(Layer layer : Driver.network){
+				for(Node node : layer.getNodes()){
+					for(double weight : node.inputs[1]){
+						Driver.prevWeights.add(weight);
+					}
+				}
+			}
 			for(int k = Driver.network.size() - 1; k >= 0 ; k--){
 				for(Node node : Driver.network.get(k).getNodes()){
 					node.updateWeights();
@@ -197,12 +205,45 @@ public class Driver {
 	
 	// checks for weight convergence in the network
 	private static boolean hasConverged(){
-		return false;
+		// get current weights
+		ArrayList<Double> allWeights = new ArrayList<Double>();
+		for(Layer layer : Driver.network){
+			for(Node node : layer.getNodes()){
+				for(double weight : node.inputs[1]){
+					allWeights.add(weight);
+				}
+			}
+		}
+		
+		// check convergence of weights to 3 decimal places
+		boolean hasConverged = true;
+		for(int i = 0; i < allWeights.size(); i++){
+			hasConverged &= (int)(allWeights.get(i) * 1000) == (int)(Driver.prevWeights.get(i) * 1000);
+		}
+		return hasConverged;
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
-	private static double testNetwork(double[] input){
-		// TODO
-		return 0;
+	private static double[] testNetwork(double[] input){
+		// set inputs
+		for(int i = 0; i < Driver.network.size(); i++){
+			for(int j = 0; j < Driver.network.get(i).getNodes().length; j++){
+				Driver.network.get(i).getNodes()[j].inputs[0][1] = input[j];
+			}
+		}
+		
+		// execute the nodes in the network
+		for(Layer layer : Driver.network){
+			for(Node node : layer.getNodes()){
+				node.execute();
+			}
+		}
+		
+		// get computed output from output nodes
+		double[] output = new double[Driver.numOutNodes];
+		for(int i = 0; i < output.length; i++){
+			output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
+		}
+		return output;
 	}
 }

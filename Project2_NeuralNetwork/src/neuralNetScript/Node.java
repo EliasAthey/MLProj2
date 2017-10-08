@@ -20,7 +20,7 @@ class Node {
 	// inputs is a 2-by-n matrix, where n is the number of inputs
 	// inputs[0][x] contains the x'th input
 	// inputs[1][x] contains the weight associated to x'th input
-	double[][] inputs = new double[2][];
+	double[][] inputs;
 	
 	// constructor
 	public Node(INodeFunction nodeFunction, IWeightFunction weightFunction, Node[] downstreamNodes){
@@ -33,8 +33,8 @@ class Node {
 	public void execute(){
 		// sum weighted inputs
 		double sum = 0;
-		for (int i = 0; i < this.inputs.length; i++) {
-			sum += (this.inputs[i][0] * this.inputs[i][1]);
+		for (int i = 0; i < this.inputs[0].length; i++) {
+			sum += (this.inputs[0][i] * this.inputs[1][i]);
 		}
 		
 		this.computedOutput = this.nodeFunction.computeOutput(sum);

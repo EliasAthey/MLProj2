@@ -38,13 +38,20 @@ public class Driver {
 		Driver.numHiddenLayers.add(5);
 		Driver.numHiddenLayers.add(4);
 		Driver.numOutNodes = 1;
-		
+		try{
+			Driver.buildNetwork();
+			Driver.trainNetwork();
+		}
+		catch(Exception e){
+			System.out.println("Error...\n");
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	// return a sample dataset of the Rosenbrock function
 	// [m][n] contains m data points, each with n-1 inputs and 1 output
 	private static double[][] getSample(int size){
-		double[][] outputs = new double[Driver.numInNodes + 1][];
+		double[][] outputs = new double[Driver.numInNodes + 1][size];
 		
 		// generate *size number of sample data points
 		for(int setIter = 0; setIter < size; setIter++) {
@@ -82,6 +89,7 @@ public class Driver {
 	
 	// create Node objects and set downstream attribute for each
 	private static void buildNetwork() throws Exception{
+		System.out.println("Building network...\n");
 		// TODO
 		switch(Driver.networkType){
 			case "rbf":
@@ -122,25 +130,23 @@ public class Driver {
 					Node[] hiddenNodes = new Node[Driver.numHiddenLayers.get(i)];
 					for(int j = 0; j < hiddenNodes.length; j++){
 						// set the node functions for hidden nodes
-						if(i == hiddenLayers.length){
+						if(i == hiddenLayers.length - 1){
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
-							// initialize input arrays for downstream nodes
-							for(Node outNode : outputNodes){
-								outNode.inputs[0] = new double[hiddenNodes.length];
-								outNode.inputs[1] = new double[hiddenNodes.length];
-								for(int k = 0; k < outNode.inputs[1].length; k++){
-									outNode.inputs[1][k] = Math.random();
+							// initialize input arrays with random weights for downstream nodes
+							for(int m = 0; m < outputNodes.length; m++){
+								outputNodes[m].inputs = new double[2][hiddenNodes.length];
+								for(int k = 0; k < outputNodes[m].inputs[1].length; k++){
+									outputNodes[m].inputs[1][k] = Math.random();
 								}
 							}
 						}
 						else{
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
-							// initialize input arrays for downstream nodes
-							for(Node hiddenNode : prevHiddenNodes){
-								hiddenNode.inputs[0] = new double[hiddenNodes.length];
-								hiddenNode.inputs[1] = new double[hiddenNodes.length];
-								for(int k = 0; k < hiddenNode.inputs[1].length; k++){
-									hiddenNode.inputs[1][k] = Math.random();
+							// initialize input arrays with random weights for downstream nodes
+							for(int m = 0; m < prevHiddenNodes.length; m++){
+								prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
+								for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
+									prevHiddenNodes[m].inputs[1][k] = Math.random();
 								}
 							}
 						}
@@ -154,14 +160,16 @@ public class Driver {
 				for(int i = 0; i < inputNodes.length; i++){
 					// set the node functions for input nodes
 					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
-					// initialize input arrays for downstream nodes
-					for(Node hiddenNode : prevHiddenNodes){
-						hiddenNode.inputs[0] = new double[inputNodes.length];
-						hiddenNode.inputs[1] = new double[inputNodes.length];
-						for(int k = 0; k < hiddenNode.inputs[1].length; k++){
-							hiddenNode.inputs[1][k] = Math.random();
+					// initialize input arrays with random weights for downstream nodes
+					for(int j = 0; j < prevHiddenNodes.length; j++){
+						prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
+						for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
+							prevHiddenNodes[j].inputs[1][k] = Math.random();
 						}
 					}
+					// initialize input node weights with 1
+					inputNodes[i].inputs = new double[2][1];
+					inputNodes[i].inputs[1][0] = 1;
 				}
 				inputLayer.setNodes(inputNodes);
 				break;
@@ -172,18 +180,18 @@ public class Driver {
 	
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
+		System.out.println("Training network...\n");
 		double[][] sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 		
 		//start timer
 		double startTime = System.currentTimeMillis();
 		
 		// iterate through each sample point or until convergence
-		for(int i = 0; i < sample.length; i++){
+		for(int i = 0; i < sample[0].length; i++){
 			// set inputs for input nodes
 			int j = 0;
-			while(j < sample[i].length - 1){
-				Driver.network.get(0).getNodes()[j].inputs = new double[2][numInNodes];
-				Driver.network.get(0).getNodes()[j].inputs[0][j] = sample[i][j];
+			while(j < sample.length - 1){
+				Driver.network.get(0).getNodes()[j].inputs[0][0] = sample[j][i];
 				j++;
 			}
 			

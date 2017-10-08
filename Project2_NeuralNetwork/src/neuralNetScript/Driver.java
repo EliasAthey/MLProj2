@@ -53,7 +53,7 @@ public class Driver {
 		inList.add(2.0);
 		inList.add(3.0);
 		inList.add(4.0);
-		System.out.println("Network test on {2, 3}:  " + Driver.testNetwork(in)[0]);
+		System.out.println("Network test on {2, 3, 4}:  " + Driver.testNetwork(in)[0]);
 		try{
 			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
 		}

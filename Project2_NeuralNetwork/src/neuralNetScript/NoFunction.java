@@ -10,7 +10,7 @@ package neuralNetScript;
 class NoFunction implements INodeFunction {
 
 	@Override
-	public Float computeOutput(Float weightedSum) {
+	public double computeOutput(double weightedSum) {
 		return weightedSum;
 	}
 

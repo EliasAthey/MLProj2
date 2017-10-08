@@ -8,5 +8,6 @@ package neuralNetScript;
  *
  */
 interface IWeightFunction {
-	Float computeWeights();
+	// updates the weights for the node
+	double computeWeights();
 }

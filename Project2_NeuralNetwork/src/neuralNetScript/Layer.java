@@ -9,10 +9,15 @@ package neuralNetScript;
  */
 class Layer {
 	// the layer of nodes
-	Node[] nodes;
+	private Node[] nodes;
 	
 	// return the nodes
 	public Node[] getNodes(){
 		return nodes;
+	}
+	
+	// set the nodes
+	public void setNodes(Node[] nodes){
+		this.nodes = nodes;
 	}
 }

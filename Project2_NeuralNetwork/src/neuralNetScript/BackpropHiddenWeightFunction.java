@@ -10,9 +10,8 @@ package neuralNetScript;
 class BackpropHiddenWeightFunction implements IWeightFunction {
 
 	@Override
-	public Float computeWeights() {
+	public double computeWeights() {
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
-
 }

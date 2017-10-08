@@ -32,7 +32,7 @@ public class Driver {
 		//						--or--
 		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
 		
-		// these will be set according to the input. Example values for now
+		// these will be set according to the input. Example mlp values for now
 		Driver.networkType = "mlp";
 		Driver.numInNodes = 3;
 		Driver.numHiddenLayers.add(5);
@@ -44,8 +44,27 @@ public class Driver {
 	// return a sample dataset of the Rosenbrock function
 	// [m][n] contains m data points, each with n-1 inputs and 1 output
 	private static double[][] getSample(int size){
-		// TODO
-		return null;
+		double[][] outputs = new double[Driver.numInNodes + 1][];
+		
+		// generate *size number of sample data points
+		for(int setIter = 0; setIter < size; setIter++) {
+			// generate random inputs
+			ArrayList<Double> inputs = new ArrayList<Double>();
+			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
+				inputs.add(inputIter, Math.random() * 100);
+				outputs[inputIter][setIter] = inputs.get(inputIter);
+			}
+			
+			// set the rosenbrock output
+			try{
+				outputs[Driver.numInNodes][setIter] = Driver.rosenbrock(inputs);
+			}
+			catch(Exception e){
+				System.out.println(e.getMessage());
+			}
+		}
+		
+		return outputs;
 	}
 	
 	// the Rosenbrock function accepting at least 2 inputs

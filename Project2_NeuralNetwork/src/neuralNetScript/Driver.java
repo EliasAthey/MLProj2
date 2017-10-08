@@ -43,9 +43,21 @@ public class Driver {
 			Driver.trainNetwork();
 		}
 		catch(Exception e){
-			System.out.println("Error...\n");
+			System.out.println("Error...");
 			System.out.println(e.getMessage());
 		}
+		
+		// test the network using 2, 3, 4 as inputs
+		double[] in = {2, 3, 4};
+		ArrayList<Double> inList = new ArrayList<Double>();
+		inList.add(2.0);
+		inList.add(3.0);
+		inList.add(4.0);
+		System.out.println("Network test on {2, 3}:  " + Driver.testNetwork(in)[0]);
+		try{
+			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
+		}
+		catch(Exception e){};
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -253,10 +265,8 @@ public class Driver {
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
 	private static double[] testNetwork(double[] input){
 		// set inputs
-		for(int i = 0; i < Driver.network.size(); i++){
-			for(int j = 0; j < Driver.network.get(i).getNodes().length; j++){
-				Driver.network.get(i).getNodes()[j].inputs[0][1] = input[j];
-			}
+		for(int i = 0; i < Driver.network.get(0).getNodes().length; i++){
+			Driver.network.get(0).getNodes()[i].inputs[0][0] = input[i];
 		}
 		
 		// execute the nodes in the network

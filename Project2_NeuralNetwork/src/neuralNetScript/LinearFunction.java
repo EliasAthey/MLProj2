@@ -8,11 +8,19 @@ package neuralNetScript;
  *
  */
 class LinearFunction implements INodeFunction {
-
+	
+	private Double funct;
+	
 	@Override
 	public double computeOutput(double weightedSum) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (funct.equals(null)) {
+			return 5*weightedSum;
+		}
+		return (funct * weightedSum);
+	}
+	
+	public void setFunct(double funct) {
+		this.funct = funct;
 	}
 
 }

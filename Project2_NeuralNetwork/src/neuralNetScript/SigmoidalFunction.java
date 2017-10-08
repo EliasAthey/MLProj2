@@ -11,8 +11,8 @@ class SigmoidalFunction implements INodeFunction {
 
 	@Override
 	public double computeOutput(double weightedSum) {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return 1/(1 + Math.exp(-1 * weightedSum));
 	}
 
 }

@@ -4,6 +4,9 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+//import pattern;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -25,19 +28,23 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		// TODO
-		// Input will receive:
-		// 				./script <netType> <numIn>-<numHidden>-...-<numHidden>-<numOut> [<other-args>]
-		// For example: ./script mlp 3-5-4-1   
-		//						--or--
-		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
+		Driver.networkType = args[1];
+		String[] layers = args[2].split("-");
 		
-		// these will be set according to the input. Example mlp values for now
-		Driver.networkType = "mlp";
-		Driver.numInNodes = 3;
-		Driver.numHiddenLayers.add(5);
-		Driver.numHiddenLayers.add(4);
-		Driver.numOutNodes = 1;
+		Driver.numInNodes = Integer.parseInt(layers[0]);
+		
+		for(int layerMaker = 1; layerMaker < (layers.length - 1); layerMaker++) {
+			
+			Driver.numHiddenLayers.add(Integer.parseInt(layers[layerMaker]));
+		}
+
+		Driver.numOutNodes = Integer.parseInt(layers[(layers.length - 1)]);
+		
+		//Driver.networkType = "mlp";
+		//Driver.numInNodes = 3;
+		//Driver.numHiddenLayers.add(5);
+		//Driver.numHiddenLayers.add(4);
+		//Driver.numOutNodes = 1;
 		try{
 			Driver.buildNetwork();
 			Driver.trainNetwork();

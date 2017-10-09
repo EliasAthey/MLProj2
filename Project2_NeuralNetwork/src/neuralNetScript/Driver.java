@@ -20,6 +20,7 @@ public class Driver {
 	private static int numOutNodes;
 	private static double convergenceTime;
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	private static double[][] sample;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -46,6 +47,7 @@ public class Driver {
 		//Driver.numHiddenLayers.add(4);
 		//Driver.numOutNodes = 1;
 		try{
+			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 			Driver.buildNetwork();
 			Driver.trainNetwork();
 		}
@@ -112,6 +114,7 @@ public class Driver {
 		// TODO
 		switch(Driver.networkType){
 			case "rbf":
+				int k = 3;				
 				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				// create output node
 				// create hidden nodes, set downstream to output, set each associatedCluster
@@ -200,22 +203,21 @@ public class Driver {
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
 		System.out.println("Training network...\n");
-		double[][] sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 		
 		//start timer
 		double startTime = System.currentTimeMillis();
 		
 		// iterate through each sample point or until convergence
-		for(int i = 0; i < sample[0].length; i++){
+		for(int i = 0; i < Driver.sample[0].length; i++){
 			// set inputs for input nodes
 			int j = 0;
-			while(j < sample.length - 1){
-				Driver.network.get(0).getNodes()[j].inputs[0][0] = sample[j][i];
+			while(j < Driver.sample.length - 1){
+				Driver.network.get(0).getNodes()[j].inputs[0][0] = Driver.sample[j][i];
 				j++;
 			}
 			
 			//set the expected output for this sample point
-			Driver.expectedOutput = sample[i][j];
+			Driver.expectedOutput = Driver.sample[i][j];
 			
 			// execute the nodes in the network
 			for(Layer layer : Driver.network){

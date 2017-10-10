@@ -13,7 +13,7 @@ class BackpropHiddenWeightFunction implements IWeightFunction {
 	private double learningRate = 1;
 	
 	@Override
-	public double computeWeights(Node node) {
+	public void computeWeights(Node node) {
 		// determines delta for this node
 		double delta = 0;
 		double downstreamSum = 0;
@@ -27,6 +27,5 @@ class BackpropHiddenWeightFunction implements IWeightFunction {
 		for(int i = 0; i < node.inputs[0].length; i++){
 			node.inputs[1][i] += this.learningRate * delta * node.inputs[0][i];
 		}
-		return 0;
 	}
 }

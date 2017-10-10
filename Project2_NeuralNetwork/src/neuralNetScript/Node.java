@@ -42,7 +42,7 @@ class Node {
 	
 	// call the weightFunction
 	public void updateWeights(){
-		this.deltaValue = this.weightFunction.computeWeights(this);
+		this.weightFunction.computeWeights(this);
 	}
 	
 	// return the set of downstream Nodes

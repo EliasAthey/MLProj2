@@ -40,11 +40,6 @@ public class Driver {
 
 		Driver.numOutNodes = Integer.parseInt(layers[(layers.length - 1)]);
 		
-		//Driver.networkType = "mlp";
-		//Driver.numInNodes = 3;
-		//Driver.numHiddenLayers.add(5);
-		//Driver.numHiddenLayers.add(4);
-		//Driver.numOutNodes = 1;
 		try{
 			Driver.buildNetwork();
 			Driver.trainNetwork();
@@ -54,7 +49,7 @@ public class Driver {
 			System.out.println(e.getMessage());
 		}
 		
-		// test the network using 2, 3, 4 as inputs
+		// test the network using 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 as inputs
 		double[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		ArrayList<Double> inList = new ArrayList<Double>();
 		inList.add(1.0);
@@ -115,15 +110,17 @@ public class Driver {
 	
 	// create Node objects and set downstream attribute for each
 	private static void buildNetwork() throws Exception{
+		// print status message and model visualization
 		System.out.println("Building network...");
 		System.out.print(Driver.numInNodes + "(in) -> ");
 		for(int i = 0; i < Driver.numHiddenLayers.size(); i++){
 			System.out.print(Driver.numHiddenLayers.get(i) + " -> ");
 		}
 		System.out.print(Driver.numOutNodes + "(out)\n\n");
-		// TODO
+		
 		switch(Driver.networkType){
 			case "rbf":
+				// TODO
 				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				// create output node
 				// create hidden nodes, set downstream to output, set each associatedCluster

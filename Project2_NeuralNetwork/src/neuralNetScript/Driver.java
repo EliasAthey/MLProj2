@@ -28,8 +28,8 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		Driver.networkType = args[1];
-		String[] layers = args[2].split("-");
+		Driver.networkType = args[0];
+		String[] layers = args[1].split("-");
 		
 		Driver.numInNodes = Integer.parseInt(layers[0]);
 		
@@ -140,6 +140,7 @@ public class Driver {
 				for(int i = 0; i < outputNodes.length; i++){
 					// set the node functions for output nodes
 					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
+					outputNodes[i].setLayerIndex(i);
 				}
 				outputLayer.setNodes(outputNodes);
 				
@@ -169,6 +170,7 @@ public class Driver {
 								}
 							}
 						}
+						hiddenNodes[j].setLayerIndex(j);
 					}
 					hiddenLayers[i].setNodes(hiddenNodes);
 					prevHiddenNodes = hiddenNodes;
@@ -189,6 +191,7 @@ public class Driver {
 					// initialize input node weights with 1
 					inputNodes[i].inputs = new double[2][1];
 					inputNodes[i].inputs[1][0] = 1;
+					inputNodes[i].setLayerIndex(i);
 				}
 				inputLayer.setNodes(inputNodes);
 				break;
@@ -214,7 +217,7 @@ public class Driver {
 				j++;
 			}
 			
-			//set the expected output for this sample point
+			// set the expected output for this sample point
 			Driver.expectedOutput = sample[i][j];
 			
 			// execute the nodes in the network
@@ -224,7 +227,7 @@ public class Driver {
 				}
 			}
 			
-			// save previous weights and update the weights in the network
+			// save previous weights to test convergence, then update the weights in the network
 			for(Layer layer : Driver.network){
 				for(Node node : layer.getNodes()){
 					for(double weight : node.inputs[1]){

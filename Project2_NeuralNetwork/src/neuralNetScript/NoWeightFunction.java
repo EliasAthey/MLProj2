@@ -10,7 +10,7 @@ package neuralNetScript;
 class NoWeightFunction implements IWeightFunction {
 
 	@Override
-	public double computeWeights() {
+	public double computeWeights(Node node) {
 		return 0;
 	}
 }

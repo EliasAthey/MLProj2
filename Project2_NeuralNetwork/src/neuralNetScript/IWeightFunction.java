@@ -9,5 +9,5 @@ package neuralNetScript;
  */
 interface IWeightFunction {
 	// updates the weights for the node
-	double computeWeights();
+	void computeWeights(Node node);
 }

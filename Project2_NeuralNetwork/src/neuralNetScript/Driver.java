@@ -30,8 +30,8 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		Driver.networkType = args[1];
-		String[] layers = args[2].split("-");
+		Driver.networkType = args[0];
+		String[] layers = args[1].split("-");
 		
 		Driver.numInNodes = Integer.parseInt(layers[0]);
 		
@@ -42,11 +42,6 @@ public class Driver {
 
 		Driver.numOutNodes = Integer.parseInt(layers[(layers.length - 1)]);
 		
-		//Driver.networkType = "mlp";
-		//Driver.numInNodes = 3;
-		//Driver.numHiddenLayers.add(5);
-		//Driver.numHiddenLayers.add(4);
-		//Driver.numOutNodes = 1;
 		try{
 			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 			
@@ -62,13 +57,20 @@ public class Driver {
 			System.out.println(e.getMessage());
 		}
 		
-		// test the network using 2, 3, 4 as inputs
-		double[] in = {2, 3, 4};
+		// test the network using 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 as inputs
+		double[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		ArrayList<Double> inList = new ArrayList<Double>();
+		inList.add(1.0);
 		inList.add(2.0);
 		inList.add(3.0);
 		inList.add(4.0);
-		System.out.println("Network test on {2, 3, 4}:  " + Driver.testNetwork(in)[0]);
+		inList.add(5.0);
+		inList.add(6.0);
+		inList.add(7.0);
+		inList.add(8.0);
+		inList.add(9.0);
+		inList.add(10.0);
+		System.out.println("Network test on {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}:  " + Driver.testNetwork(in)[0]);
 		try{
 			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
 		}
@@ -116,13 +118,20 @@ public class Driver {
 	
 	// create Node objects and set downstream attribute for each
 	private static void buildNetwork() throws Exception{
-		System.out.println("Building network...\n");
-
+		// print status message and model visualization
+		System.out.println("Building network...");
+		System.out.print(Driver.numInNodes + "(in) -> ");
+		for(int i = 0; i < Driver.numHiddenLayers.size(); i++){
+			System.out.print(Driver.numHiddenLayers.get(i) + " -> ");
+		}
+		System.out.print(Driver.numOutNodes + "(out)\n\n");
+		
 		switch(Driver.networkType){
 			case "rbf":
+				// TODO
+				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				Driver.k = 3;
 				kmeans();
-				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				// create output node
 				// create hidden nodes, set downstream to output, set each associatedCluster
 				// create input nodes, set the input, set downstream to all nodes in hidden layer
@@ -150,6 +159,7 @@ public class Driver {
 				for(int i = 0; i < outputNodes.length; i++){
 					// set the node functions for output nodes
 					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
+					outputNodes[i].setLayerIndex(i);
 				}
 				outputLayer.setNodes(outputNodes);
 				
@@ -179,6 +189,7 @@ public class Driver {
 								}
 							}
 						}
+						hiddenNodes[j].setLayerIndex(j);
 					}
 					hiddenLayers[i].setNodes(hiddenNodes);
 					prevHiddenNodes = hiddenNodes;
@@ -199,6 +210,7 @@ public class Driver {
 					// initialize input node weights with 1
 					inputNodes[i].inputs = new double[2][1];
 					inputNodes[i].inputs[1][0] = 1;
+					inputNodes[i].setLayerIndex(i);
 				}
 				inputLayer.setNodes(inputNodes);
 				break;
@@ -233,7 +245,7 @@ public class Driver {
 				}
 			}
 			
-			// save previous weights and update the weights in the network
+			// save previous weights to test convergence, then update the weights in the network
 			for(Layer layer : Driver.network){
 				for(Node node : layer.getNodes()){
 					for(double weight : node.inputs[1]){
@@ -306,7 +318,7 @@ public class Driver {
 		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
 		int[] labels = new int[Driver.sample[0].length];
 		
-		//pick initial random data points to be centroids
+		// pick initial random data points to be centroids
 		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
 			Double[] randCentroid = new Double[Driver.numInNodes];
 			int randIndex = (int) (Math.random() * Driver.sample[0].length);
@@ -322,7 +334,7 @@ public class Driver {
 		
 		do{
 			
-			//save old for convergence test
+			// save old for convergence test
 			oldCentroids = centroids;
 			iterations ++;
 			labels = getLabels(centroids);
@@ -330,9 +342,9 @@ public class Driver {
 		}while (!stopKmeans(oldCentroids, centroids));
 	}
 	
-	//assigns a label for every datapoint in the sample set
-	//uses distance function to find closest centroid
-	//label is index of centroid in centroids[]
+	// assigns a label for every datapoint in the sample set
+	// uses distance function to find closest centroid
+	// label is index of centroid in centroids[]
 	private static int[] getLabels(ArrayList<Double[]> centroids) {
 		
 		int[] labels = new int[Driver.sample[0].length];
@@ -357,17 +369,17 @@ public class Driver {
 		return labels;
 	}
 	
-	//calculate geometric mean of all sample points with a common label
-	//make this point a new centroid
-	//dimensionSums[l][d] holds the label, [l] with the sum of all 
-	//dimensions of all samples with that label, [d]
+	// calculate geometric mean of all sample points with a common label
+	// make this point a new centroid
+	// dimensionSums[l][d] holds the label, [l] with the sum of all 
+	// dimensions of all samples with that label, [d]
 	private static ArrayList<Double[]> getNewCentroids(ArrayList<Double[]> centroids, int[] labels) {
 		
 		
 		ArrayList<Double[]> newCentroids = new ArrayList<Double[]>(Driver.k);
 		int[] labelDivisors = new int[Driver.k];
 		Double[][] dimensionSums = new Double[Driver.k][Driver.numInNodes];
-		//initialize dimensionSums to 0
+		// initialize dimensionSums to 0
 		for (int i = 0; i < dimensionSums.length; i++) {
 			for (int x = 0; x < dimensionSums[0].length; x++) {
 				dimensionSums[i][x] = (double) 0;

@@ -4,6 +4,9 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+//import pattern;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -17,6 +20,8 @@ public class Driver {
 	private static int numOutNodes;
 	private static double convergenceTime;
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	private static Double[][] sample;
+	private static int k;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -25,22 +30,32 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		// TODO
-		// Input will receive:
-		// 				./script <netType> <numIn>-<numHidden>-...-<numHidden>-<numOut> [<other-args>]
-		// For example: ./script mlp 3-5-4-1   
-		//						--or--
-		//				./script rbf 3-5-1     <--- Note: rbf should only ever have 3 numbers, 2md number is k-value
+		Driver.networkType = args[1];
+		String[] layers = args[2].split("-");
 		
-		// these will be set according to the input. Example mlp values for now
-		Driver.networkType = "mlp";
-		Driver.numInNodes = 3;
-		Driver.numHiddenLayers.add(5);
-		Driver.numHiddenLayers.add(4);
-		Driver.numOutNodes = 1;
+		Driver.numInNodes = Integer.parseInt(layers[0]);
+		
+		for(int layerMaker = 1; layerMaker < (layers.length - 1); layerMaker++) {
+			
+			Driver.numHiddenLayers.add(Integer.parseInt(layers[layerMaker]));
+		}
+
+		Driver.numOutNodes = Integer.parseInt(layers[(layers.length - 1)]);
+		
+		//Driver.networkType = "mlp";
+		//Driver.numInNodes = 3;
+		//Driver.numHiddenLayers.add(5);
+		//Driver.numHiddenLayers.add(4);
+		//Driver.numOutNodes = 1;
 		try{
+			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
+			
 			Driver.buildNetwork();
 			Driver.trainNetwork();
+		}
+		catch(NullPointerException e){
+			System.out.println("Error...");
+			System.out.println(e.getMessage());
 		}
 		catch(Exception e){
 			System.out.println("Error...");
@@ -62,8 +77,8 @@ public class Driver {
 	
 	// return a sample dataset of the Rosenbrock function
 	// [m][n] contains m data points, each with n-1 inputs and 1 output
-	private static double[][] getSample(int size){
-		double[][] outputs = new double[Driver.numInNodes + 1][size];
+	private static Double[][] getSample(int size){
+		Double[][] outputs = new Double[Driver.numInNodes + 1][size];
 		
 		// generate *size number of sample data points
 		for(int setIter = 0; setIter < size; setIter++) {
@@ -102,9 +117,11 @@ public class Driver {
 	// create Node objects and set downstream attribute for each
 	private static void buildNetwork() throws Exception{
 		System.out.println("Building network...\n");
-		// TODO
+
 		switch(Driver.networkType){
 			case "rbf":
+				Driver.k = 3;
+				kmeans();
 				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				// create output node
 				// create hidden nodes, set downstream to output, set each associatedCluster
@@ -193,22 +210,21 @@ public class Driver {
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
 		System.out.println("Training network...\n");
-		double[][] sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 		
 		//start timer
 		double startTime = System.currentTimeMillis();
 		
 		// iterate through each sample point or until convergence
-		for(int i = 0; i < sample[0].length; i++){
+		for(int i = 0; i < Driver.sample[0].length; i++){
 			// set inputs for input nodes
 			int j = 0;
-			while(j < sample.length - 1){
-				Driver.network.get(0).getNodes()[j].inputs[0][0] = sample[j][i];
+			while(j < Driver.sample.length - 1){
+				Driver.network.get(0).getNodes()[j].inputs[0][0] = Driver.sample[j][i];
 				j++;
 			}
 			
 			//set the expected output for this sample point
-			Driver.expectedOutput = sample[i][j];
+			Driver.expectedOutput = Driver.sample[i][j];
 			
 			// execute the nodes in the network
 			for(Layer layer : Driver.network){
@@ -282,5 +298,130 @@ public class Driver {
 			output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
 		}
 		return output;
+	}
+
+	// given a k and the training set return k centroids that
+	// define the centers of the clusters
+	private static void kmeans(){
+		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
+		int[] labels = new int[Driver.sample[0].length];
+		
+		//pick initial random data points to be centroids
+		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
+			Double[] randCentroid = new Double[Driver.numInNodes];
+			int randIndex = (int) (Math.random() * Driver.sample[0].length);
+			
+			for(int randSampler = 0; randSampler < Driver.numInNodes; randSampler++) {
+				randCentroid[randSampler] = sample[randSampler] [randIndex]; 
+			}
+			centroids.add(randCentroid);
+		}
+		
+		int iterations = 0;
+		ArrayList<Double[]> oldCentroids = null;
+		
+		do{
+			
+			//save old for convergence test
+			oldCentroids = centroids;
+			iterations ++;
+			labels = getLabels(centroids);
+			centroids = getNewCentroids(centroids, labels);
+		}while (!stopKmeans(oldCentroids, centroids));
+	}
+	
+	//assigns a label for every datapoint in the sample set
+	//uses distance function to find closest centroid
+	//label is index of centroid in centroids[]
+	private static int[] getLabels(ArrayList<Double[]> centroids) {
+		
+		int[] labels = new int[Driver.sample[0].length];
+		Double[] distances = new Double[Driver.numInNodes];
+		Double sum = null;
+		
+		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
+			
+			for (int centroidIter = 0; centroidIter < Driver.k; centroidIter++) {//loop thru centroids
+				sum = (double) 0;
+				
+				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++){//loop thru dimensions of centroids
+					//sum for Euclidean distance function
+					sum += Math.pow(Driver.sample[dimensionIter][sampleIter] - centroids.get(centroidIter)[dimensionIter], 2);
+				}
+				//calc distance to each centroid from each sample
+				distances[centroidIter] = Math.sqrt(sum);
+			}
+			//store index of min distance in labels
+			labels[sampleIter] = findMin(distances);
+		}
+		return labels;
+	}
+	
+	//calculate geometric mean of all sample points with a common label
+	//make this point a new centroid
+	//dimensionSums[l][d] holds the label, [l] with the sum of all 
+	//dimensions of all samples with that label, [d]
+	private static ArrayList<Double[]> getNewCentroids(ArrayList<Double[]> centroids, int[] labels) {
+		
+		
+		ArrayList<Double[]> newCentroids = new ArrayList<Double[]>(Driver.k);
+		int[] labelDivisors = new int[Driver.k];
+		Double[][] dimensionSums = new Double[Driver.k][Driver.numInNodes];
+		//initialize dimensionSums to 0
+		for (int i = 0; i < dimensionSums.length; i++) {
+			for (int x = 0; x < dimensionSums[0].length; x++) {
+				dimensionSums[i][x] = (double) 0;
+			}
+		}
+		
+		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
+			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
+				
+				dimensionSums[labels[sampleIter]][dimIter] += Driver.sample[dimIter][sampleIter];
+				labelDivisors[labels[sampleIter]] ++;
+			}
+		}
+		
+		for(int labelIter = 0; labelIter < Driver.k; labelIter++) {
+			Double[] newCent = new Double[Driver.numInNodes];
+			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
+
+				newCent[dimIter] = dimensionSums[labelIter][dimIter] / labelDivisors[labelIter];
+			}
+			newCentroids.add(labelIter, newCent);
+		}
+		return newCentroids;
+	}
+
+	private static int findMin(Double[] distanceArray) {
+		int minIndex = 0;
+		for(int index = 1; index < distanceArray.length; index++) {
+			if (distanceArray[minIndex] > distanceArray[index]) {
+				minIndex = index;
+			}
+		}
+		return minIndex;
+	}
+	
+	private static boolean stopKmeans(ArrayList<Double[]> centroids, ArrayList<Double[]> oldCentroids) {
+		
+		int index = 0;
+		int flags = 0;
+		while(centroids.size() > index) {
+			
+			for(int arrayIter = 0; arrayIter < centroids.get(index).length ; arrayIter++) {
+				
+				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.01) {
+					flags++;
+				}
+			}
+			index++;
+		}
+
+		if (flags >= (Driver.k * Driver.numInNodes * .85)) {
+			return true;
+		}
+		return false;
+		
 	}
 }

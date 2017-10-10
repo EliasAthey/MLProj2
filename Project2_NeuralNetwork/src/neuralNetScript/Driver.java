@@ -55,12 +55,19 @@ public class Driver {
 		}
 		
 		// test the network using 2, 3, 4 as inputs
-		double[] in = {2, 3, 4};
+		double[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		ArrayList<Double> inList = new ArrayList<Double>();
+		inList.add(1.0);
 		inList.add(2.0);
 		inList.add(3.0);
 		inList.add(4.0);
-		System.out.println("Network test on {2, 3, 4}:  " + Driver.testNetwork(in)[0]);
+		inList.add(5.0);
+		inList.add(6.0);
+		inList.add(7.0);
+		inList.add(8.0);
+		inList.add(9.0);
+		inList.add(10.0);
+		System.out.println("Network test on {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}:  " + Driver.testNetwork(in)[0]);
 		try{
 			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
 		}
@@ -108,7 +115,12 @@ public class Driver {
 	
 	// create Node objects and set downstream attribute for each
 	private static void buildNetwork() throws Exception{
-		System.out.println("Building network...\n");
+		System.out.println("Building network...");
+		System.out.print(Driver.numInNodes + "(in) -> ");
+		for(int i = 0; i < Driver.numHiddenLayers.size(); i++){
+			System.out.print(Driver.numHiddenLayers.get(i) + " -> ");
+		}
+		System.out.print(Driver.numOutNodes + "(out)\n\n");
 		// TODO
 		switch(Driver.networkType){
 			case "rbf":

@@ -150,6 +150,14 @@ public class Driver {
 		}
 		outputLayer.setNodes(outputNodes);
 		
+		// set k-value, clusters, and sigma for rbf network
+		Driver.k = Driver.numHiddenLayers.get(0);
+		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
+		if(Driver.networkType.equals("rbf")){
+			clusters = kmeans();
+			RadialBasisFunction.setSigma(2.5);
+		}
+		
 		// create hidden layer nodes and store in hidden layer
 		Node[] prevHiddenNodes = null;
 		for(int i = hiddenLayers.length - 1; i >= 0; i--){
@@ -160,13 +168,9 @@ public class Driver {
 					switch(Driver.networkType){
 						case "rbf": 
 							hiddenNodes[j] = new Node(new RadialBasisFunction(), new NoWeightFunction(), outputNodes);
-							Driver.k = Driver.numHiddenLayers.get(0);
-
-							// TODO need to store the clusters. This should return an ArrayList<double[]>
-							ArrayList<Double[]> clusters = kmeans();
+							// set the associated cluster
 							hiddenNodes[j].setAssociatedCluster(clusters.get(j));
-							// set the sigma value for RadialBasisFunction to whatever we want
-							RadialBasisFunction.setSigma(2.5);
+							
 							break;
 						case "mlp":
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);

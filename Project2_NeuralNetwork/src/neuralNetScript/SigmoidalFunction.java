@@ -12,7 +12,7 @@ class SigmoidalFunction implements INodeFunction {
 	@Override
 	public double computeOutput(double weightedSum) {
 		
-		return 1/(1 + Math.exp(-1 * weightedSum));
+		return Math.tanh(weightedSum);
 	}
 
 }

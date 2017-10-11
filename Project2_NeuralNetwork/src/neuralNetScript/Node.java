@@ -38,6 +38,9 @@ class Node {
 			sum += (this.inputs[0][i] * this.inputs[1][i]);
 		}
 		this.computedOutput = this.nodeFunction.computeOutput(sum);
+		for(Node node : this.downstream){
+			node.inputs[0][this.layerIndex] = this.computedOutput;
+		}
 	}
 	
 	// call the weightFunction

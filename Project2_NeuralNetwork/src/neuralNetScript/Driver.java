@@ -57,20 +57,13 @@ public class Driver {
 			System.out.println(e.getMessage());
 		}
 		
-		// test the network using 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 as inputs
-		double[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		// test the network using 1, 2, 3 as inputs
+		double[] in = {1, 2, 3};
 		ArrayList<Double> inList = new ArrayList<Double>();
 		inList.add(1.0);
 		inList.add(2.0);
 		inList.add(3.0);
-		inList.add(4.0);
-		inList.add(5.0);
-		inList.add(6.0);
-		inList.add(7.0);
-		inList.add(8.0);
-		inList.add(9.0);
-		inList.add(10.0);
-		System.out.println("Network test on {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}:  " + Driver.testNetwork(in)[0]);
+		System.out.println("Network test on {1, 2, 3}:  " + Driver.testNetwork(in)[0]);
 		try{
 			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
 		}
@@ -126,42 +119,50 @@ public class Driver {
 		}
 		System.out.print(Driver.numOutNodes + "(out)\n\n");
 		
+		// initialize Layers and network
+		Layer inputLayer = new Layer();
+		Layer[] hiddenLayers = new Layer[Driver.numHiddenLayers.size()];
+		for(int i = 0; i < hiddenLayers.length; i++){
+			hiddenLayers[i] = new Layer();
+		}
+		Layer outputLayer = new Layer();
+		Driver.network = new ArrayList<Layer>();
+		Driver.network.add(inputLayer);
+		for(Layer layer : hiddenLayers){
+			Driver.network.add(layer);
+		}
+		Driver.network.add(outputLayer);
+		
+		// create output nodes and store in output layer
+		Node[] outputNodes = new Node[Driver.numOutNodes];
+		for(int i = 0; i < outputNodes.length; i++){
+			// set the node functions for output nodes
+			switch(Driver.networkType){
+				case "rbf":
+					outputNodes[i] = new Node(new RadialBasisFunction(), new BackpropFinalWeightFunction(), new Node[0]);
+					break;
+				case "mlp": 
+					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
+					break;
+			}
+			outputNodes[i].setLayerIndex(i);
+		}
+		outputLayer.setNodes(outputNodes);
+		
 		switch(Driver.networkType){
 			case "rbf":
 				// TODO
 				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
 				Driver.k = 3;
 				kmeans();
-				// create output node
-				// create hidden nodes, set downstream to output, set each associatedCluster
+				
+				// create hidden nodes (one for each cluster), set downstream to output, set each associatedCluster
 				// create input nodes, set the input, set downstream to all nodes in hidden layer
 				// set the sigma value for RadialBasisFunction to whatever we want
 				RadialBasisFunction.setSigma(2.5);
 				break;
 				
 			case "mlp":
-				// initialize Layers and network
-				Layer inputLayer = new Layer();
-				Layer[] hiddenLayers = new Layer[Driver.numHiddenLayers.size()];
-				for(int i = 0; i < hiddenLayers.length; i++){
-					hiddenLayers[i] = new Layer();
-				}
-				Layer outputLayer = new Layer();
-				Driver.network = new ArrayList<Layer>();
-				Driver.network.add(inputLayer);
-				for(Layer layer : hiddenLayers){
-					Driver.network.add(layer);
-				}
-				Driver.network.add(outputLayer);
-				
-				// create output nodes and store in output layer
-				Node[] outputNodes = new Node[Driver.numOutNodes];
-				for(int i = 0; i < outputNodes.length; i++){
-					// set the node functions for output nodes
-					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
-					outputNodes[i].setLayerIndex(i);
-				}
-				outputLayer.setNodes(outputNodes);
 				
 				// create hidden layer nodes and store in hidden layer
 				Node[] prevHiddenNodes = null;

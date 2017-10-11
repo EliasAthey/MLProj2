@@ -150,15 +150,6 @@ public class Driver {
 		}
 		outputLayer.setNodes(outputNodes);
 		
-		// RBF specific stuff
-		// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
-		Driver.k = Driver.numHiddenLayers.get(0);
-		kmeans();
-		// create hidden nodes (one for each cluster), set downstream to output, set each associatedCluster
-		// create input nodes, set the input, set downstream to all nodes in hidden layer
-		// set the sigma value for RadialBasisFunction to whatever we want
-		RadialBasisFunction.setSigma(2.5);
-		
 		// create hidden layer nodes and store in hidden layer
 		Node[] prevHiddenNodes = null;
 		for(int i = hiddenLayers.length - 1; i >= 0; i--){
@@ -169,8 +160,13 @@ public class Driver {
 					switch(Driver.networkType){
 						case "rbf": 
 							hiddenNodes[j] = new Node(new RadialBasisFunction(), new NoWeightFunction(), outputNodes);
-							// TODO
-							// set associated cluster for hiddenNodes[j]
+							Driver.k = Driver.numHiddenLayers.get(0);
+
+							// TODO need to store the clusters. This should return an ArrayList<double[]>
+							kmeans();
+							// TODO set associated cluster for hiddenNodes[j]
+							// set the sigma value for RadialBasisFunction to whatever we want
+							RadialBasisFunction.setSigma(2.5);
 							break;
 						case "mlp":
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);

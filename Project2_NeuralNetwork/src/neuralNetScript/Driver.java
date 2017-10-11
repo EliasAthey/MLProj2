@@ -163,8 +163,8 @@ public class Driver {
 							Driver.k = Driver.numHiddenLayers.get(0);
 
 							// TODO need to store the clusters. This should return an ArrayList<double[]>
-							kmeans();
-							// TODO set associated cluster for hiddenNodes[j]
+							ArrayList<Double[]> clusters = kmeans();
+							hiddenNodes[j].setAssociatedCluster(clusters.get(j));
 							// set the sigma value for RadialBasisFunction to whatever we want
 							RadialBasisFunction.setSigma(2.5);
 							break;
@@ -322,7 +322,7 @@ public class Driver {
 
 	// given a k and the training set return k centroids that
 	// define the centers of the clusters
-	private static void kmeans(){
+	private static ArrayList<Double[]> kmeans(){
 		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
 		int[] labels = new int[Driver.sample[0].length];
 		
@@ -348,6 +348,8 @@ public class Driver {
 			labels = getLabels(centroids);
 			centroids = getNewCentroids(centroids, labels);
 		}while (!stopKmeans(oldCentroids, centroids));
+		
+		return centroids;
 	}
 	
 	// assigns a label for every datapoint in the sample set

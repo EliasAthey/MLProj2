@@ -3,6 +3,8 @@
  */
 package neuralNetScript;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
  *
@@ -86,5 +88,23 @@ class Node {
 	// get the layer index
 	public int getLayerIndex(){
 		return this.layerIndex;
+	}
+	
+	// set the layer index
+	public void setAssociatedCluster(Double[] cluster){
+		if(this.nodeFunction.getClass().getTypeName().equals("RadialBasisFunction")){
+			try{
+				this.nodeFunction.getClass().getMethod("setAssociatedCluster", double[].class).invoke(this.nodeFunction, cluster);
+			}
+			catch(NoSuchMethodException e){
+				System.out.println(e.getMessage());
+			} 
+			catch (IllegalAccessException e) {
+				System.out.println(e.getMessage());
+			} 
+			catch (InvocationTargetException e) {
+				System.out.println(e.getMessage());
+			}
+		}
 	}
 }

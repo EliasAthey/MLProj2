@@ -139,85 +139,96 @@ public class Driver {
 			// set the node functions for output nodes
 			switch(Driver.networkType){
 				case "rbf":
-					outputNodes[i] = new Node(new RadialBasisFunction(), new BackpropFinalWeightFunction(), new Node[0]);
+					outputNodes[i] = new Node(new NoFunction(), new BackpropFinalWeightFunction(), new Node[0]);
 					break;
 				case "mlp": 
 					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
 					break;
+				default: throw new Exception("The specified network type is not defined.");
 			}
 			outputNodes[i].setLayerIndex(i);
 		}
 		outputLayer.setNodes(outputNodes);
 		
-		switch(Driver.networkType){
-			case "rbf":
-				// TODO
-				// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
-				Driver.k = 3;
-				kmeans();
-				
-				// create hidden nodes (one for each cluster), set downstream to output, set each associatedCluster
-				// create input nodes, set the input, set downstream to all nodes in hidden layer
-				// set the sigma value for RadialBasisFunction to whatever we want
-				RadialBasisFunction.setSigma(2.5);
-				break;
-				
-			case "mlp":
-				
-				// create hidden layer nodes and store in hidden layer
-				Node[] prevHiddenNodes = null;
-				for(int i = hiddenLayers.length - 1; i >= 0; i--){
-					Node[] hiddenNodes = new Node[Driver.numHiddenLayers.get(i)];
-					for(int j = 0; j < hiddenNodes.length; j++){
-						// set the node functions for hidden nodes
-						if(i == hiddenLayers.length - 1){
+		// RBF specific stuff
+		// use k-value to create clusters via k-means clustering; this determines # of hidden nodes
+		Driver.k = Driver.numHiddenLayers.get(0);
+		kmeans();
+		// create hidden nodes (one for each cluster), set downstream to output, set each associatedCluster
+		// create input nodes, set the input, set downstream to all nodes in hidden layer
+		// set the sigma value for RadialBasisFunction to whatever we want
+		RadialBasisFunction.setSigma(2.5);
+		
+		// create hidden layer nodes and store in hidden layer
+		Node[] prevHiddenNodes = null;
+		for(int i = hiddenLayers.length - 1; i >= 0; i--){
+			Node[] hiddenNodes = new Node[Driver.numHiddenLayers.get(i)];
+			for(int j = 0; j < hiddenNodes.length; j++){
+				// set the node functions for hidden nodes
+				if(i == hiddenLayers.length - 1){
+					switch(Driver.networkType){
+						case "rbf": 
+							hiddenNodes[j] = new Node(new RadialBasisFunction(), new NoWeightFunction(), outputNodes);
+							// TODO
+							// set associated cluster for hiddenNodes[j]
+							break;
+						case "mlp":
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
-							// initialize input arrays with random weights for downstream nodes
-							for(int m = 0; m < outputNodes.length; m++){
-								outputNodes[m].inputs = new double[2][hiddenNodes.length];
-								for(int k = 0; k < outputNodes[m].inputs[1].length; k++){
-									outputNodes[m].inputs[1][k] = Math.random();
-								}
-							}
-						}
-						else{
-							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
-							// initialize input arrays with random weights for downstream nodes
-							for(int m = 0; m < prevHiddenNodes.length; m++){
-								prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
-								for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
-									prevHiddenNodes[m].inputs[1][k] = Math.random();
-								}
-							}
-						}
-						hiddenNodes[j].setLayerIndex(j);
+							break;
 					}
-					hiddenLayers[i].setNodes(hiddenNodes);
-					prevHiddenNodes = hiddenNodes;
-				}
-				
-				// create input nodes and store in input layer
-				Node[] inputNodes = new Node[Driver.numInNodes];
-				for(int i = 0; i < inputNodes.length; i++){
-					// set the node functions for input nodes
-					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
+					
 					// initialize input arrays with random weights for downstream nodes
-					for(int j = 0; j < prevHiddenNodes.length; j++){
-						prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
-						for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
-							prevHiddenNodes[j].inputs[1][k] = Math.random();
+					for(int m = 0; m < outputNodes.length; m++){
+						outputNodes[m].inputs = new double[2][hiddenNodes.length];
+						for(int k = 0; k < outputNodes[m].inputs[1].length; k++){
+							outputNodes[m].inputs[1][k] = Math.random();
 						}
 					}
-					// initialize input node weights with 1
-					inputNodes[i].inputs = new double[2][1];
-					inputNodes[i].inputs[1][0] = 1;
-					inputNodes[i].setLayerIndex(i);
 				}
-				inputLayer.setNodes(inputNodes);
-				break;
-				
-			default: throw new Exception("The specified network type is not defined.");
+				else{
+					if(Driver.networkType.equals("rbf")){
+						throw new Exception("An rbf network cannot have more than one hidden layer.");
+					}
+					hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
+					// initialize input arrays with random weights for downstream nodes
+					for(int m = 0; m < prevHiddenNodes.length; m++){
+						prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
+						for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
+							prevHiddenNodes[m].inputs[1][k] = Math.random();
+						}
+					}
+				}
+				hiddenNodes[j].setLayerIndex(j);
+			}
+			hiddenLayers[i].setNodes(hiddenNodes);
+			prevHiddenNodes = hiddenNodes;
 		}
+		
+		// create input nodes and store in input layer
+		Node[] inputNodes = new Node[Driver.numInNodes];
+		for(int i = 0; i < inputNodes.length; i++){
+			// set the node functions for input nodes
+			switch(Driver.networkType){
+				case "rbf": 
+					inputNodes[i] = new Node(new NoFunction(), new NoWeightFunction(), prevHiddenNodes);
+					break;
+				case "mlp":
+					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
+					break;
+			}
+			// initialize input arrays with random weights for downstream nodes
+			for(int j = 0; j < prevHiddenNodes.length; j++){
+				prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
+				for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
+					prevHiddenNodes[j].inputs[1][k] = Math.random();
+				}
+			}
+			// initialize input node weights with 1
+			inputNodes[i].inputs = new double[2][1];
+			inputNodes[i].inputs[1][0] = 1;
+			inputNodes[i].setLayerIndex(i);
+		}
+		inputLayer.setNodes(inputNodes);
 	}
 	
 	// input training data into the network, update weights until convergence
@@ -237,7 +248,7 @@ public class Driver {
 			}
 			
 			//set the expected output for this sample point
-			Driver.expectedOutput = Driver.sample[i][j];
+			Driver.expectedOutput = Driver.sample[j][i];
 			
 			// execute the nodes in the network
 			for(Layer layer : Driver.network){

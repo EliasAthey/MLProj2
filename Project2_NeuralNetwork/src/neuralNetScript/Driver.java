@@ -55,6 +55,9 @@ public class Driver {
 		catch(Exception e){
 			System.out.println("Error...");
 			System.out.println(e.getMessage());
+			for(StackTraceElement stack : e.getStackTrace()){
+				System.out.println(stack);
+			}
 		}
 		
 		// test the network using 1, 2, 3 as inputs

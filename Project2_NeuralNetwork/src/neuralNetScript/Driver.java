@@ -30,8 +30,11 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		Driver.networkType = args[0];
-		String[] layers = args[1].split("-");
+		//args[0] = /.script
+		//args[1] = networkType
+		//args[2] = layers
+		Driver.networkType = args[1];
+		String[] layers = args[2].split("-");
 		
 		Driver.numInNodes = Integer.parseInt(layers[0]);
 		
@@ -47,10 +50,6 @@ public class Driver {
 			
 			Driver.buildNetwork();
 			Driver.trainNetwork();
-		}
-		catch(NullPointerException e){
-			System.out.println("Error...");
-			System.out.println(e.getMessage());
 		}
 		catch(Exception e){
 			System.out.println("Error...");
@@ -365,7 +364,7 @@ public class Driver {
 	private static int[] getLabels(ArrayList<Double[]> centroids) {
 		
 		int[] labels = new int[Driver.sample[0].length];
-		Double[] distances = new Double[Driver.numInNodes];
+		Double[] distances = new Double[Driver.k];
 		Double sum = null;
 		
 		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples

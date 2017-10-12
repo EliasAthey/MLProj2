@@ -30,11 +30,10 @@ public class Driver {
 	static double expectedOutput;
 	
 	public static void main(String args[]){
-		//args[0] = /.script
-		//args[1] = networkType
-		//args[2] = layers
-		Driver.networkType = args[1];
-		String[] layers = args[2].split("-");
+		//args[0] = networkType
+		//args[1] = layers
+		Driver.networkType = args[0];
+		String[] layers = args[1].split("-");
 		
 		Driver.numInNodes = Integer.parseInt(layers[0]);
 		

@@ -29,9 +29,10 @@ public class Driver {
 	// package accessible sample expected output
 	static double expectedOutput;
 	
+	// the entry point of the program
+	//args[0] = networkType
+	//args[1] = layers
 	public static void main(String args[]){
-		//args[0] = networkType
-		//args[1] = layers
 		Driver.networkType = args[0];
 		String[] layers = args[1].split("-");
 		
@@ -156,7 +157,7 @@ public class Driver {
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		if(Driver.networkType.equals("rbf")){
 			clusters = kmeans();
-			RadialBasisFunction.setSigma(2.5);
+			RadialBasisFunction.setSigma(1.0);
 		}
 		
 		// create hidden layer nodes and store in hidden layer
@@ -171,36 +172,31 @@ public class Driver {
 							hiddenNodes[j] = new Node(new RadialBasisFunction(), new NoWeightFunction(), outputNodes);
 							// set the associated cluster
 							hiddenNodes[j].setAssociatedCluster(clusters.get(j));
-							
 							break;
 						case "mlp":
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
 							break;
 					}
-					
-					// initialize input arrays with random weights for downstream nodes
-					for(int m = 0; m < outputNodes.length; m++){
-						outputNodes[m].inputs = new double[2][hiddenNodes.length];
-						for(int k = 0; k < outputNodes[m].inputs[1].length; k++){
-							outputNodes[m].inputs[1][k] = Math.random();
-						}
-					}
+					prevHiddenNodes = outputNodes;
 				}
 				else{
 					if(Driver.networkType.equals("rbf")){
 						throw new Exception("An rbf network cannot have more than one hidden layer.");
 					}
 					hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
-					// initialize input arrays with random weights for downstream nodes
-					for(int m = 0; m < prevHiddenNodes.length; m++){
-						prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
-						for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
-							prevHiddenNodes[m].inputs[1][k] = Math.random();
-						}
-					}
 				}
 				hiddenNodes[j].setLayerIndex(j);
 			}
+			
+			// initialize input arrays with random weights for downstream nodes
+			for(int m = 0; m < prevHiddenNodes.length; m++){
+				prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
+				for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
+					prevHiddenNodes[m].inputs[1][k] = Math.random();
+				}
+			}
+			
+			// set hidden nodes to this layer, set reference to these hidden nodes
 			hiddenLayers[i].setNodes(hiddenNodes);
 			prevHiddenNodes = hiddenNodes;
 		}
@@ -217,18 +213,21 @@ public class Driver {
 					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
 					break;
 			}
-			// initialize input arrays with random weights for downstream nodes
-			for(int j = 0; j < prevHiddenNodes.length; j++){
-				prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
-				for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
-					prevHiddenNodes[j].inputs[1][k] = Math.random();
-				}
-			}
+			
 			// initialize input node weights with 1
 			inputNodes[i].inputs = new double[2][1];
 			inputNodes[i].inputs[1][0] = 1;
 			inputNodes[i].setLayerIndex(i);
 		}
+		
+		// initialize first hidden layer input arrays with random weights
+		for(int j = 0; j < prevHiddenNodes.length; j++){
+			prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
+			for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
+				prevHiddenNodes[j].inputs[1][k] = Math.random();
+			}
+		}
+		
 		inputLayer.setNodes(inputNodes);
 	}
 	

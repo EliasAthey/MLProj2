@@ -2,7 +2,6 @@
  * 
  */
 package neuralNetScript;
-import java.util.ArrayList;
 
 
 /**

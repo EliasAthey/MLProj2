@@ -76,17 +76,26 @@ public class Driver {
 			}
 		}
 		
-		// test the network using 1, 2, 3 as inputs
-		double[] in = {1, 2, 3};
+		// test the network with a random sample
+		double[] in = new double[Driver.numInNodes];
 		ArrayList<Double> inList = new ArrayList<Double>();
-		inList.add(1.0);
-		inList.add(2.0);
-		inList.add(3.0);
-		System.out.println("Network test on {1, 2, 3}:  " + Driver.testNetwork(in)[0]);
-		try{
-			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
+		for(int i = 0; i < in.length; i++){
+			double value = (int)(Math.random() * 100);
+			in[i] = value;
+			inList.add(i, value);
 		}
-		catch(Exception e){};
+		System.out.print("\nNetwork test on {");
+		for(int i = 0; i < in.length - 1; i++){
+			System.out.print(in[i] + ", ");
+		}
+		System.out.print(in[in.length - 1] + "}");
+		System.out.print(": " + Driver.testNetwork(in)[0]);
+		try{
+			System.out.println("\nActual Rosenbrock value: " + Driver.rosenbrock(inList));
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+		};
 	}
 	
 	// return a sample dataset of the Rosenbrock function

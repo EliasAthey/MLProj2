@@ -13,14 +13,28 @@ import java.util.regex.Pattern;
  *
  */
 public class Driver {
-	// attributes
+	// the type of network being implemented
 	private static String networkType;
+	
+	// the number of inputs
 	private static int numInNodes;
-	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();// length is # of layers, value @ each index is # of nodes in that layer
+	
+	// an array list containing the number of nodes in each hidden layer. size() is number of hidden layers
+	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();
+	
+	// the number of output nodes
 	private static int numOutNodes;
+	
+	// the convergence time
 	private static double convergenceTime;
+	
+	// the weights of the network ont he previous iteration of updating weights
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	
+	// the training sample
 	private static Double[][] sample;
+	
+	// the k-value used for k-means clustering
 	private static int k;
 	
 	// the network itself
@@ -419,6 +433,7 @@ public class Driver {
 		return newCentroids;
 	}
 
+	// determines the minimum value in the distance array
 	private static int findMin(Double[] distanceArray) {
 		int minIndex = 0;
 		for(int index = 1; index < distanceArray.length; index++) {
@@ -429,6 +444,7 @@ public class Driver {
 		return minIndex;
 	}
 	
+	// a convergence test for the k-means algorithm that returns true if the cluster vectors have converged
 	private static boolean stopKmeans(ArrayList<Double[]> centroids, ArrayList<Double[]> oldCentroids) {
 		
 		int index = 0;
@@ -448,6 +464,5 @@ public class Driver {
 			return true;
 		}
 		return false;
-		
 	}
 }

@@ -17,7 +17,7 @@ class BackpropFinalWeightFunction implements IWeightFunction {
 	public void computeWeights(Node node) {
 		double delta = 0; 
 		// determine current node delta error term
-		delta = node.getComputedOutput() * 
+		delta = -1 * node.getComputedOutput() * 
 				(1 - node.getComputedOutput()) *
 				(Driver.expectedOutput - node.getComputedOutput());
 		node.setDeltaValue(delta);

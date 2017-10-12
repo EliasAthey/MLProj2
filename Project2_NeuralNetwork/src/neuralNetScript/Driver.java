@@ -29,13 +29,16 @@ public class Driver {
 	private static double convergenceTime;
 	
 	// the weights of the network ont he previous iteration of updating weights
-	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	private static ArrayList<Double> prevWeights;
 	
 	// the training sample
 	private static Double[][] sample;
 	
 	// the k-value used for k-means clustering
 	private static int k;
+	
+	// the sigma value used for rbf
+	private static final double sigma = 100;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -171,7 +174,7 @@ public class Driver {
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		if(Driver.networkType.equals("rbf")){
 			clusters = kmeans();
-			RadialBasisFunction.setSigma(1.0);
+			RadialBasisFunction.setSigma(Driver.sigma);
 		}
 		
 		// create hidden layer nodes and store in hidden layer
@@ -254,6 +257,7 @@ public class Driver {
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
+			System.out.println("Sample: " + i);
 			// set inputs for input nodes
 			int j = 0;
 			while(j < Driver.sample.length - 1){
@@ -272,6 +276,7 @@ public class Driver {
 			}
 			
 			// save previous weights to test convergence, then update the weights in the network
+			Driver.prevWeights = new ArrayList<Double>();
 			for(Layer layer : Driver.network){
 				for(Node node : layer.getNodes()){
 					for(double weight : node.inputs[1]){
@@ -311,6 +316,9 @@ public class Driver {
 		// check convergence of weights to 3 decimal places
 		boolean hasConverged = true;
 		for(int i = 0; i < allWeights.size(); i++){
+			if(!hasConverged){
+				break;
+			}
 			hasConverged &= (int)(allWeights.get(i) * 1000) == (int)(Driver.prevWeights.get(i) * 1000);
 		}
 		return hasConverged;

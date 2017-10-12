@@ -8,5 +8,6 @@ package neuralNetScript;
  *
  */
 interface INodeFunction {
+	// computes the output for any node given a weighted sum of its inputs
 	double computeOutput(double weightedSum);
 }

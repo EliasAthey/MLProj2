@@ -9,8 +9,10 @@ package neuralNetScript;
  */
 class LinearFunction implements INodeFunction {
 	
+	// the linear scaling factor
 	private Double funct;
 	
+	// linearly scales the weightedSum
 	@Override
 	public double computeOutput(double weightedSum) {
 		if (funct.equals(null)) {
@@ -19,6 +21,7 @@ class LinearFunction implements INodeFunction {
 		return (funct * weightedSum);
 	}
 	
+	// set the scaling factor
 	public void setFunct(double funct) {
 		this.funct = funct;
 	}

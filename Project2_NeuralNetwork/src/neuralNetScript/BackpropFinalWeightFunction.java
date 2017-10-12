@@ -8,8 +8,11 @@ package neuralNetScript;
  *
  */
 class BackpropFinalWeightFunction implements IWeightFunction {
+	 
+	//Ada, the learning rate
 	private double learningRate = 1;
 
+	// updates the weights using the backpropagation rule for output nodes
 	@Override
 	public void computeWeights(Node node) {
 		double delta = 0; 

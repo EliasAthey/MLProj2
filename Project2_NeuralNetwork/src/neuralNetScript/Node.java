@@ -70,16 +70,6 @@ class Node {
 		return this.computedOutput;
 	}
 	
-//	// set the expected output
-//	public void setExpectedOutput(double expectedOutput){
-//		this.expectedOutput = expectedOutput;
-//	}
-//	
-//	// return the expected output
-//	public double getExpectedOutput(){
-//		return this.expectedOutput;
-//	}
-	
 	// set the layer index
 	public void setLayerIndex(int index){
 		this.layerIndex = index;

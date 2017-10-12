@@ -11,10 +11,13 @@ import java.util.ArrayList;
  */
 class RadialBasisFunction implements INodeFunction {
 
+	// the parameter sigma - the variance
 	private static double sigma;
-	private double[] associatedCluster;// one of the vectors made via k-means clustering
-	//ArrayList<Double> test = new ArrayList<Double>(); //where this is the input of datapoints
 	
+	// one of the vectors made via k-means clustering
+	private double[] associatedCluster;
+	
+	// computes the output for Radial Basis Function nodes
 	@Override
 	public double computeOutput(double weightedSum) {
 		//need to call RBF here this.rbf(test); //fix here

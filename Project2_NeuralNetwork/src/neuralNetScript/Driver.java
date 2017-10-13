@@ -78,19 +78,28 @@ public class Driver {
 		
 		// test the network with a random set of samples sample
 		Double[][] testSample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 100);
+		double[] computedOutput = new double[Driver.numOutNodes];
 		for(int datapoint = 0; datapoint < testSample[0].length; datapoint++){
 			Double[] input = new Double[testSample.length - 1];
-			System.out.print("\nNetwork test on {");
+//			System.out.print("\nNetwork test on {");
 			for(int i = 0; i < testSample.length - 2; i++){
-				System.out.print(testSample[i][datapoint] + ", ");
+//				System.out.print(testSample[i][datapoint] + ", ");
 				input[i] = testSample[i][datapoint];
 			}
-			System.out.print(testSample[testSample.length - 2][datapoint] + "}");
+//			System.out.print(testSample[testSample.length - 2][datapoint] + "}");
 			input[testSample.length - 2] = testSample[testSample.length - 2][datapoint];
-			
-			System.out.print(": " + Driver.testNetwork(input)[0]);
-			System.out.println("\nActual Rosenbrock value: " + testSample[testSample.length - 1][datapoint]);
+			computedOutput = Driver.testNetwork(input);
+//			System.out.print(": " + computedOutput);
+//			System.out.println("\nActual Rosenbrock value: " + testSample[testSample.length - 1][datapoint]);
 		}
+		
+		// print some metrics
+		double avgError = 0.0;
+		for(int i = 0; i < computedOutput.length; i++){
+			avgError += Math.abs(computedOutput[i] - testSample[testSample.length - 1][i]);
+		}
+		avgError = avgError / computedOutput.length;
+		System.out.println("Average Error in Output: " + avgError);
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -174,15 +183,15 @@ public class Driver {
 		outputLayer.setNodes(outputNodes);
 		
 		// set k-value, clusters, and sigma for rbf network
-		Driver.k = Driver.numHiddenLayers.get(0);
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		if(Driver.networkType.equals("rbf")){
+			Driver.k = Driver.numHiddenLayers.get(0);
 			clusters = kmeans();
 			RadialBasisFunction.setSigma(Driver.sigma);
 		}
 		
 		// create hidden layer nodes and store in hidden layer
-		Node[] prevHiddenNodes = null;
+		Node[] prevHiddenNodes = outputNodes;
 		for(int i = hiddenLayers.length - 1; i >= 0; i--){
 			Node[] hiddenNodes = new Node[Driver.numHiddenLayers.get(i)];
 			for(int j = 0; j < hiddenNodes.length; j++){
@@ -198,7 +207,6 @@ public class Driver {
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
 							break;
 					}
-					prevHiddenNodes = outputNodes;
 				}
 				else{
 					if(Driver.networkType.equals("rbf")){
@@ -241,7 +249,7 @@ public class Driver {
 			inputNodes[i].setLayerIndex(i);
 		}
 		
-		// initialize first hidden layer input arrays with random weights
+		// initialize first hidden layer (or output layer in the case with no hidden layers) input arrays with random weights
 		for(int j = 0; j < prevHiddenNodes.length; j++){
 			prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
 			for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
@@ -255,7 +263,6 @@ public class Driver {
 				}
 			}
 		}
-		
 		inputLayer.setNodes(inputNodes);
 	}
 	
@@ -268,7 +275,7 @@ public class Driver {
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
-			System.out.println("Sample: " + i);
+			System.out.println("Sample Iteration: " + i);
 			// set inputs for input nodes
 			int j = 0;
 			while(j < Driver.sample.length - 1){

@@ -217,11 +217,15 @@ public class Driver {
 				hiddenNodes[j].setLayerIndex(j);
 			}
 			
-			// initialize input arrays with random weights for downstream nodes
+			// initialize input arrays with random weights between -0.5 and 0.5 for downstream nodes
 			for(int m = 0; m < prevHiddenNodes.length; m++){
 				prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
 				for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
-					prevHiddenNodes[m].inputs[1][k] = Math.random();
+					int sign = 1;
+					if(Math.random() < 0.5){
+						sign = -1;
+					}
+					prevHiddenNodes[m].inputs[1][k] = sign * (Math.random() * 0.5);
 				}
 			}
 			
@@ -258,7 +262,11 @@ public class Driver {
 						prevHiddenNodes[j].inputs[1][k] = 1.0;
 						break;
 					case "mlp":
-						prevHiddenNodes[j].inputs[1][k] = Math.random();
+						int sign = 1;
+						if(Math.random() < 0.5){
+							sign = -1;
+						}
+						prevHiddenNodes[j].inputs[1][k] = sign * (Math.random() * 0.5);
 						break;
 				}
 			}

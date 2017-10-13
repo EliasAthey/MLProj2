@@ -26,5 +26,4 @@ class BackpropFinalWeightFunction implements IWeightFunction {
 			node.inputs[1][i] += this.learningRate * delta * node.inputs[0][i];
 		}
 	}
-
 }

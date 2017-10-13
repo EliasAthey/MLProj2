@@ -23,7 +23,8 @@ class LinearFunction implements INodeFunction {
 		if (funct.equals(null)) {
 			return 5*sum;
 		}
-		return (funct * sum);
+		
+		return Math.round(funct * sum * 1000000.0) / 1000000.0;
 	}
 	
 	// set the scaling factor

@@ -17,7 +17,7 @@ class NoFunction implements INodeFunction {
 		for (int i = 0; i < inputs[0].length; i++) {
 			sum += (inputs[0][i] * inputs[1][i]);
 		}
-		return sum;
+		return Math.round(sum * 1000000.0) / 1000000.0;
 	}
 
 }

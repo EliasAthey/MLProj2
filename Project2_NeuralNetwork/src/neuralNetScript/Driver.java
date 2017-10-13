@@ -103,7 +103,7 @@ public class Driver {
 			// generate random inputs
 			ArrayList<Double> inputs = new ArrayList<Double>();
 			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
-				inputs.add(inputIter, Math.random() * 100);
+				inputs.add(inputIter, Math.random() * 1000);
 				outputs[inputIter][setIter] = inputs.get(inputIter);
 			}
 			
@@ -245,7 +245,14 @@ public class Driver {
 		for(int j = 0; j < prevHiddenNodes.length; j++){
 			prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
 			for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
-				prevHiddenNodes[j].inputs[1][k] = Math.random();
+				switch(Driver.networkType){
+					case "rbf": 
+						prevHiddenNodes[j].inputs[1][k] = 1.0;
+						break;
+					case "mlp":
+						prevHiddenNodes[j].inputs[1][k] = Math.random();
+						break;
+				}
 			}
 		}
 		

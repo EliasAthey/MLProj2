@@ -4,6 +4,7 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 //import pattern;
@@ -22,6 +23,7 @@ public class Driver {
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
 	private static Double[][] sample;
 	private static int k;
+	private static int kMeansConvergenceTracker = 0; 
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -329,8 +331,11 @@ public class Driver {
 	// given a k and the training set return k centroids that
 	// define the centers of the clusters
 	private static ArrayList<Double[]> kmeans(){
+		
 		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
 		int[] labels = new int[Driver.sample[0].length];
+		int convergenceTracker = 0; 
+		long start = System.currentTimeMillis();
 		
 		// pick initial random data points to be centroids
 		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
@@ -354,7 +359,7 @@ public class Driver {
 			labels = getLabels(centroids);
 			centroids = getNewCentroids(centroids, labels);
 		}while (!stopKmeans(oldCentroids, centroids));
-		
+		System.out.println("kmeans convergence time = " + (System.currentTimeMillis() - start) + " milliseconds");
 		return centroids;
 	}
 	
@@ -439,15 +444,23 @@ public class Driver {
 			
 			for(int arrayIter = 0; arrayIter < centroids.get(index).length ; arrayIter++) {
 				
-				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.01) {
+				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.0001) {
 					flags++;
 				}
 			}
 			index++;
 		}
 
-		if (flags >= (Driver.k * Driver.numInNodes * .85)) {
-			return true;
+		//System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
+
+		if (flags >= (Driver.k * Driver.numInNodes)) {
+			Driver.kMeansConvergenceTracker++;
+			if(Driver.kMeansConvergenceTracker >= 3) {
+				return true;
+			}
+		}
+		else {
+			Driver.kMeansConvergenceTracker = 0;
 		}
 		return false;
 		

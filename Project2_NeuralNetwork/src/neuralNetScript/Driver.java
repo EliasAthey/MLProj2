@@ -76,26 +76,21 @@ public class Driver {
 			}
 		}
 		
-		// test the network with a random sample
-		double[] in = new double[Driver.numInNodes];
-		ArrayList<Double> inList = new ArrayList<Double>();
-		for(int i = 0; i < in.length; i++){
-			double value = (int)(Math.random() * 100);
-			in[i] = value;
-			inList.add(i, value);
+		// test the network with a random set of samples sample
+		Double[][] testSample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 100);
+		for(int datapoint = 0; datapoint < testSample[0].length; datapoint++){
+			Double[] input = new Double[testSample.length - 1];
+			System.out.print("\nNetwork test on {");
+			for(int i = 0; i < testSample.length - 2; i++){
+				System.out.print(testSample[i][datapoint] + ", ");
+				input[i] = testSample[i][datapoint];
+			}
+			System.out.print(testSample[testSample.length - 2][datapoint] + "}");
+			input[testSample.length - 2] = testSample[testSample.length - 2][datapoint];
+			
+			System.out.print(": " + Driver.testNetwork(input)[0]);
+			System.out.println("\nActual Rosenbrock value: " + testSample[testSample.length - 1][datapoint]);
 		}
-		System.out.print("\nNetwork test on {");
-		for(int i = 0; i < in.length - 1; i++){
-			System.out.print(in[i] + ", ");
-		}
-		System.out.print(in[in.length - 1] + "}");
-		System.out.print(": " + Driver.testNetwork(in)[0]);
-		try{
-			System.out.println("\nActual Rosenbrock value: " + Driver.rosenbrock(inList));
-		}
-		catch(Exception e){
-			System.out.println(e.getMessage());
-		};
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -334,7 +329,7 @@ public class Driver {
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
-	private static double[] testNetwork(double[] input){
+	private static double[] testNetwork(Double[] input){
 		// set inputs
 		for(int i = 0; i < Driver.network.get(0).getNodes().length; i++){
 			Driver.network.get(0).getNodes()[i].inputs[0][0] = input[i];

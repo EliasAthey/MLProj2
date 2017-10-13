@@ -14,16 +14,33 @@ import java.util.regex.Pattern;
  *
  */
 public class Driver {
-	// attributes
+	// the type of network being implemented
 	private static String networkType;
+	
+	// the number of inputs
 	private static int numInNodes;
-	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();// length is # of layers, value @ each index is # of nodes in that layer
+	
+	// an array list containing the number of nodes in each hidden layer. size() is number of hidden layers
+	private static ArrayList<Integer> numHiddenLayers = new ArrayList<Integer>();
+	
+	// the number of output nodes
 	private static int numOutNodes;
+	
+	// the convergence time
 	private static double convergenceTime;
-	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	
+	// the weights of the network ont he previous iteration of updating weights
+	private static ArrayList<Double> prevWeights;
+	
+	// the training sample
 	private static Double[][] sample;
+	
+	// the k-value used for k-means clustering
 	private static int k;
 	private static int kMeansConvergenceTracker = 0; 
+	
+	// the sigma value used for rbf
+	private static final double sigma = 100;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -31,12 +48,12 @@ public class Driver {
 	// package accessible sample expected output
 	static double expectedOutput;
 	
+	// the entry point of the program
+	//args[0] = networkType
+	//args[1] = layers
 	public static void main(String args[]){
-		//args[0] = /.script
-		//args[1] = networkType
-		//args[2] = layers
-		Driver.networkType = args[1];
-		String[] layers = args[2].split("-");
+		Driver.networkType = args[0];
+		String[] layers = args[1].split("-");
 		
 		Driver.numInNodes = Integer.parseInt(layers[0]);
 		
@@ -61,17 +78,26 @@ public class Driver {
 			}
 		}
 		
-		// test the network using 1, 2, 3 as inputs
-		double[] in = {1, 2, 3};
+		// test the network with a random sample
+		double[] in = new double[Driver.numInNodes];
 		ArrayList<Double> inList = new ArrayList<Double>();
-		inList.add(1.0);
-		inList.add(2.0);
-		inList.add(3.0);
-		System.out.println("Network test on {1, 2, 3}:  " + Driver.testNetwork(in)[0]);
-		try{
-			System.out.println("Actual Rosenbrock value: " + Driver.rosenbrock(inList));
+		for(int i = 0; i < in.length; i++){
+			double value = (int)(Math.random() * 100);
+			in[i] = value;
+			inList.add(i, value);
 		}
-		catch(Exception e){};
+		System.out.print("\nNetwork test on {");
+		for(int i = 0; i < in.length - 1; i++){
+			System.out.print(in[i] + ", ");
+		}
+		System.out.print(in[in.length - 1] + "}");
+		System.out.print(": " + Driver.testNetwork(in)[0]);
+		try{
+			System.out.println("\nActual Rosenbrock value: " + Driver.rosenbrock(inList));
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+		};
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -159,7 +185,7 @@ public class Driver {
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		if(Driver.networkType.equals("rbf")){
 			clusters = kmeans();
-			RadialBasisFunction.setSigma(2.5);
+			RadialBasisFunction.setSigma(Driver.sigma);
 		}
 		
 		// create hidden layer nodes and store in hidden layer
@@ -174,36 +200,31 @@ public class Driver {
 							hiddenNodes[j] = new Node(new RadialBasisFunction(), new NoWeightFunction(), outputNodes);
 							// set the associated cluster
 							hiddenNodes[j].setAssociatedCluster(clusters.get(j));
-							
 							break;
 						case "mlp":
 							hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), outputNodes);
 							break;
 					}
-					
-					// initialize input arrays with random weights for downstream nodes
-					for(int m = 0; m < outputNodes.length; m++){
-						outputNodes[m].inputs = new double[2][hiddenNodes.length];
-						for(int k = 0; k < outputNodes[m].inputs[1].length; k++){
-							outputNodes[m].inputs[1][k] = Math.random();
-						}
-					}
+					prevHiddenNodes = outputNodes;
 				}
 				else{
 					if(Driver.networkType.equals("rbf")){
 						throw new Exception("An rbf network cannot have more than one hidden layer.");
 					}
 					hiddenNodes[j] = new Node(new SigmoidalFunction(), new BackpropHiddenWeightFunction(), prevHiddenNodes);
-					// initialize input arrays with random weights for downstream nodes
-					for(int m = 0; m < prevHiddenNodes.length; m++){
-						prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
-						for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
-							prevHiddenNodes[m].inputs[1][k] = Math.random();
-						}
-					}
 				}
 				hiddenNodes[j].setLayerIndex(j);
 			}
+			
+			// initialize input arrays with random weights for downstream nodes
+			for(int m = 0; m < prevHiddenNodes.length; m++){
+				prevHiddenNodes[m].inputs = new double[2][hiddenNodes.length];
+				for(int k = 0; k < prevHiddenNodes[m].inputs[1].length; k++){
+					prevHiddenNodes[m].inputs[1][k] = Math.random();
+				}
+			}
+			
+			// set hidden nodes to this layer, set reference to these hidden nodes
 			hiddenLayers[i].setNodes(hiddenNodes);
 			prevHiddenNodes = hiddenNodes;
 		}
@@ -220,18 +241,21 @@ public class Driver {
 					inputNodes[i] = new Node(new SigmoidalFunction(), new NoWeightFunction(), prevHiddenNodes);
 					break;
 			}
-			// initialize input arrays with random weights for downstream nodes
-			for(int j = 0; j < prevHiddenNodes.length; j++){
-				prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
-				for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
-					prevHiddenNodes[j].inputs[1][k] = Math.random();
-				}
-			}
+			
 			// initialize input node weights with 1
 			inputNodes[i].inputs = new double[2][1];
 			inputNodes[i].inputs[1][0] = 1;
 			inputNodes[i].setLayerIndex(i);
 		}
+		
+		// initialize first hidden layer input arrays with random weights
+		for(int j = 0; j < prevHiddenNodes.length; j++){
+			prevHiddenNodes[j].inputs = new double[2][inputNodes.length];
+			for(int k = 0; k < prevHiddenNodes[j].inputs[1].length; k++){
+				prevHiddenNodes[j].inputs[1][k] = Math.random();
+			}
+		}
+		
 		inputLayer.setNodes(inputNodes);
 	}
 	
@@ -244,6 +268,7 @@ public class Driver {
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
+			System.out.println("Sample: " + i);
 			// set inputs for input nodes
 			int j = 0;
 			while(j < Driver.sample.length - 1){
@@ -262,6 +287,7 @@ public class Driver {
 			}
 			
 			// save previous weights to test convergence, then update the weights in the network
+			Driver.prevWeights = new ArrayList<Double>();
 			for(Layer layer : Driver.network){
 				for(Node node : layer.getNodes()){
 					for(double weight : node.inputs[1]){
@@ -301,6 +327,9 @@ public class Driver {
 		// check convergence of weights to 3 decimal places
 		boolean hasConverged = true;
 		for(int i = 0; i < allWeights.size(); i++){
+			if(!hasConverged){
+				break;
+			}
 			hasConverged &= (int)(allWeights.get(i) * 1000) == (int)(Driver.prevWeights.get(i) * 1000);
 		}
 		return hasConverged;
@@ -426,6 +455,7 @@ public class Driver {
 		return newCentroids;
 	}
 
+	// determines the minimum value in the distance array
 	private static int findMin(Double[] distanceArray) {
 		int minIndex = 0;
 		for(int index = 1; index < distanceArray.length; index++) {
@@ -436,6 +466,7 @@ public class Driver {
 		return minIndex;
 	}
 	
+	// a convergence test for the k-means algorithm that returns true if the cluster vectors have converged
 	private static boolean stopKmeans(ArrayList<Double[]> centroids, ArrayList<Double[]> oldCentroids) {
 		
 		int index = 0;
@@ -451,7 +482,7 @@ public class Driver {
 			index++;
 		}
 
-		//System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
+		System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
 
 		if (flags >= (Driver.k * Driver.numInNodes)) {
 			Driver.kMeansConvergenceTracker++;
@@ -463,6 +494,5 @@ public class Driver {
 			Driver.kMeansConvergenceTracker = 0;
 		}
 		return false;
-		
 	}
 }

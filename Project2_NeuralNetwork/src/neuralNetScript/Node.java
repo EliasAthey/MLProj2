@@ -32,14 +32,9 @@ class Node {
 		this.downstream = downstreamNodes;
 	}
 	
-	// sum weighted inputs and send to nodeFunction
+	// send inputs to nodeFunction and set new inputs of downstream nodes
 	public void execute(){
-		// sum weighted inputs
-		double sum = 0;
-		for (int i = 0; i < this.inputs[0].length; i++) {
-			sum += (this.inputs[0][i] * this.inputs[1][i]);
-		}
-		this.computedOutput = this.nodeFunction.computeOutput(sum);
+		this.computedOutput = this.nodeFunction.computeOutput(this.inputs);
 		for(Node node : this.downstream){
 			node.inputs[0][this.layerIndex] = this.computedOutput;
 		}
@@ -70,16 +65,6 @@ class Node {
 		return this.computedOutput;
 	}
 	
-//	// set the expected output
-//	public void setExpectedOutput(double expectedOutput){
-//		this.expectedOutput = expectedOutput;
-//	}
-//	
-//	// return the expected output
-//	public double getExpectedOutput(){
-//		return this.expectedOutput;
-//	}
-	
 	// set the layer index
 	public void setLayerIndex(int index){
 		this.layerIndex = index;
@@ -92,9 +77,11 @@ class Node {
 	
 	// set the layer index
 	public void setAssociatedCluster(Double[] cluster){
-		if(this.nodeFunction.getClass().getTypeName().equals("RadialBasisFunction")){
+		if(this.nodeFunction.getClass().getTypeName().equals("neuralNetScript.RadialBasisFunction")){
 			try{
-				this.nodeFunction.getClass().getMethod("setAssociatedCluster", double[].class).invoke(this.nodeFunction, cluster);
+				Class[] formalParams = {Double[].class};
+				Object[] actualParams = {cluster};
+				this.nodeFunction.getClass().getMethod("setAssociatedCluster", formalParams).invoke(this.nodeFunction, actualParams);
 			}
 			catch(NoSuchMethodException e){
 				System.out.println(e.getMessage());

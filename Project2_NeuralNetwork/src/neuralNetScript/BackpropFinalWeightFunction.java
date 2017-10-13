@@ -8,12 +8,23 @@ package neuralNetScript;
  *
  */
 class BackpropFinalWeightFunction implements IWeightFunction {
+	 
+	//Ada, the learning rate
+	private double learningRate = 1;
 
+	// updates the weights using the backpropagation rule for output nodes
 	@Override
 	public void computeWeights(Node node) {
-		// TODO
-		// determine delta (use Driver.expectedOutput and node.getComputedOutput())
-		// set delta value in node
-		// update weights (node.inputs[0][i] contains the value of input i, node.inputs[1][i] contains the weight associated to that input value)
+		double delta = 0; 
+		// determine current node delta error term
+		delta = -1 * node.getComputedOutput() * 
+				(1 - node.getComputedOutput()) *
+				(Driver.expectedOutput - node.getComputedOutput());
+		node.setDeltaValue(delta);
+		// update weights
+		for(int i = 0; i < node.inputs[0].length; i++){
+			node.inputs[1][i] += this.learningRate * delta * node.inputs[0][i];
+		}
 	}
+
 }

@@ -67,7 +67,6 @@ public class Driver {
 			
 			Driver.buildNetwork();
 			Driver.crossValidation(5);
-			//Driver.trainNetwork();
 		}
 		catch(Exception e){
 			System.out.println("Error...");

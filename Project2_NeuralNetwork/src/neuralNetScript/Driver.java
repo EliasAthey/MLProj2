@@ -320,7 +320,7 @@ public class Driver {
 					// set inputs
 					Double[] inputs = new Double[Driver.numInNodes];
 					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
-						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
+						inputs[dimensionIter] = Driver.sample[dimensionIter][sampleIter];
 					}
 					
 					//set the expected output for this sample point
@@ -338,10 +338,8 @@ public class Driver {
 			}
 
 			// compute average error for this fold
-			for(int errorIter = 0; errorIter < averageError.length; errorIter++){
-				averageError[errorIter] = averageError[errorIter] / Driver.sample[0].length / k;
-				System.out.println(averageError[errorIter]);
-			}
+			averageError[0] = averageError[0] / (Driver.sample[0].length / k);
+			System.out.println(averageError[0]);
 		}
 	}
 	

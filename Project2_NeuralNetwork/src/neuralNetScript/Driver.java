@@ -68,6 +68,7 @@ public class Driver {
 			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 			
 			Driver.buildNetwork();
+			Driver.crossValidation(5);
 			Driver.trainNetwork();
 		}
 		catch(Exception e){
@@ -258,13 +259,84 @@ public class Driver {
 		
 		inputLayer.setNodes(inputNodes);
 	}
+
+	private static void crossValidation(int k) {
+
+		System.out.println("Training network...\n");
+		//start timer
+		double startTime = System.currentTimeMillis();
+		
+		
+		//keeps track of number of times trained, trains k-1 times
+		for (int trainIter = 0; trainIter < k-2; trainIter++) {
+			
+			//loops over all data points
+			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
+				
+				//loops over dimensions of each point
+				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+					
+					//splits data into k-1 sets 
+					if (sampleIter % k == trainIter) { 
+						
+						//assign sample to input nodes
+						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
+						System.out.println(sampleIter % k);
+					}
+					
+				}
+				
+				//splits data into k-1 sets 
+				if (sampleIter % k == trainIter) { 
+
+					//set the expected output for this sample point
+					Driver.expectedOutput = Driver.sample[Driver.numInNodes + 1][sampleIter];
+				}
+				
+				// execute the nodes in the network
+				for(Layer layer : Driver.network){
+					for(Node node : layer.getNodes()){
+						node.execute();
+					}
+				}
+
+				// save previous weights to test convergence, then update the weights in the network
+				Driver.prevWeights = new ArrayList<Double>();
+				for(Layer layer : Driver.network){
+					for(Node node : layer.getNodes()){
+						for(double weight : node.inputs[1]){
+							Driver.prevWeights.add(weight);
+						}
+					}
+				}
+
+				for(int updateIter = Driver.network.size() - 1; updateIter >= 0 ; updateIter--){
+					for(Node node : Driver.network.get(updateIter).getNodes()){
+						node.updateWeights();
+					}
+				}
+				
+			}
+			//test data after every train
+			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
+				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+
+					//test on kth set of data 
+					if (sampleIter % k == k-1) {
+						System.out.println(sampleIter % k);
+					}
+					
+				}
+			}
+		}
+		
+		// save convergence time
+		Driver.convergenceTime = System.currentTimeMillis() - startTime;
+		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
+	}
 	
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
-		System.out.println("Training network...\n");
-		
-		//start timer
-		double startTime = System.currentTimeMillis();
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
@@ -307,9 +379,6 @@ public class Driver {
 			}
 		}
 		
-		// save convergence time
-		Driver.convergenceTime = System.currentTimeMillis() - startTime;
-		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
 	}
 	
 	// checks for weight convergence in the network

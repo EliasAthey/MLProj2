@@ -394,7 +394,7 @@ public class Driver {
 				input[i] = sample[i][datapoint];
 			}
 			double[] output = Driver.testNetwork(input);
-			avgError += Math.abs(output[0] - sample[sample.length - 1][datapoint]);
+			avgError += output[0] - sample[sample.length - 1][datapoint];
 		}
 		return avgError / sample[0].length;
 	}

@@ -27,11 +27,15 @@ class RadialBasisFunction implements INodeFunction {
 		for(int i = 0; i < inputs[0].length; i++){
 			difference[i] = (inputs[0][i]- this.associatedCluster[i]);		
 		}
-		double top = 0;
+		double value = 0;
 		for(int i = 0; i < difference.length; i++){
-			top += Math.pow(difference[i], 2);
+			value += Math.pow(difference[i], 2);
 		}
-		return Math.exp(-1 * (top / (2 * sigma)));
+		value = Math.sqrt(value);
+		value = value / (2 * Math.pow(sigma, 2));
+		value = Math.pow(value, 2);
+		value = -1 * value;
+		return value;
 	}
 	
 	// sets the sigma value to be used for all Radial Basis Functions

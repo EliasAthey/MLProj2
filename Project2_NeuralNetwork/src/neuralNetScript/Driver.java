@@ -303,7 +303,7 @@ public class Driver {
 						}
 					}
 
-					// save previous weights to test convergence, then update the weights in the network
+					// save previous weights to test convergence
 					Driver.prevWeights = new ArrayList<Double>();
 					for(Layer layer : Driver.network){
 						for(Node node : layer.getNodes()){
@@ -313,15 +313,15 @@ public class Driver {
 						}
 					}
 					
-					//I'm 
+					// update weights in the network
 					for(int updateIter = Driver.network.size() - 1; updateIter >= 0 ; updateIter--){
 						for(Node node : Driver.network.get(updateIter).getNodes()){
 							node.updateWeights();
 						}
 					}
 				}
-				
 			}
+			
 			//test data after every train
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
 				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {

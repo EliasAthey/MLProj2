@@ -124,7 +124,6 @@ public class Driver {
 				System.out.println(e.getMessage());
 			}
 		}
-		
 		return outputs;
 	}
 	
@@ -311,7 +310,7 @@ public class Driver {
 			// check convergence every 10000 iterations, if the network has not converged, update previous convergence error
 			if((i + 1) % 10000 == 0){
 				Driver.currentConvergenceError = Driver.currentConvergenceError / 10000.0;
-				System.out.println("Checking convergence...\nPrevious: " + Driver.prevConvergenceError + "\nCurrent: " + Driver.currentConvergenceError + "\n");
+				System.out.println("Iter: " + i + "\nChecking convergence...\nPrevious Error: " + Driver.prevConvergenceError + "\nCurrent Error: " + Driver.currentConvergenceError + "\n");
 				if(Driver.hasConverged()){
 					break;
 				}

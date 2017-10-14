@@ -10,18 +10,17 @@ package neuralNetScript;
 class BackpropHiddenWeightFunction implements IWeightFunction {
 
 	// Ada, the learning rate
-	private double learningRate = 0.1;
+	private double learningRate = 0.000001;
 	
 	// updates the weights using the backpropagation rule for hidden nodes
 	@Override
 	public void computeWeights(Node node) {
 		// determines delta for this node
-		double delta = 0;
 		double downstreamSum = 0;
 		for(Node downstreamNode : node.getDownstream()){
 			downstreamSum += downstreamNode.getDeltaValue() * downstreamNode.inputs[1][node.getLayerIndex()];
 		}
-		delta = -1 * node.getComputedOutput() * (1 - node.getComputedOutput()) * downstreamSum;
+		double delta = node.getComputedOutput() * (1 - node.getComputedOutput()) * downstreamSum;
 		node.setDeltaValue(delta);
 		
 		// update weights

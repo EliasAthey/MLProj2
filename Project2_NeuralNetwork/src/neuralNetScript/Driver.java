@@ -31,6 +31,9 @@ public class Driver {
 	// the previous convergence error
 	private static double prevConvergenceError = 0;
 	
+	// the previous iteration's weights, used upon convergence
+	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
+	
 	// the training sample
 	private static Double[][] sample;
 	
@@ -76,30 +79,8 @@ public class Driver {
 			}
 		}
 		
-		// test the network with a random set of samples sample
-		Double[][] testSample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 100);
-		double[] computedOutput = new double[Driver.numOutNodes];
-		for(int datapoint = 0; datapoint < testSample[0].length; datapoint++){
-			Double[] input = new Double[testSample.length - 1];
-//			System.out.print("\nNetwork test on {");
-			for(int i = 0; i < testSample.length - 2; i++){
-//				System.out.print(testSample[i][datapoint] + ", ");
-				input[i] = testSample[i][datapoint];
-			}
-//			System.out.print(testSample[testSample.length - 2][datapoint] + "}");
-			input[testSample.length - 2] = testSample[testSample.length - 2][datapoint];
-			computedOutput = Driver.testNetwork(input);
-//			System.out.print(": " + computedOutput);
-//			System.out.println("\nActual Rosenbrock value: " + testSample[testSample.length - 1][datapoint]);
-		}
-		
 		// print some metrics
-		double avgError = 0.0;
-		for(int i = 0; i < computedOutput.length; i++){
-			avgError += Math.abs(computedOutput[i] - testSample[testSample.length - 1][i]);
-		}
-		avgError = avgError / computedOutput.length;
-		System.out.println("Average Error in Output: " + avgError);
+		System.out.println("Average Error in Output: " + Driver.getAverageError());
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -112,7 +93,7 @@ public class Driver {
 			// generate random inputs
 			ArrayList<Double> inputs = new ArrayList<Double>();
 			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
-				inputs.add(inputIter, Math.random() * 1000);
+				inputs.add(inputIter, Math.random() * 10);
 				outputs[inputIter][setIter] = inputs.get(inputIter);
 			}
 			
@@ -300,6 +281,15 @@ public class Driver {
 				}
 			}
 			
+			// save current weights to be used when the weights converge
+			for(int k = 0; k < Driver.network.size(); k++){
+				for(Node node : Driver.network.get(k).getNodes()){
+					for(int weightIndex = 0; weightIndex < node.inputs[1].length; weightIndex++){
+						Driver.prevWeights.add(node.inputs[1][weightIndex]);
+					}
+				}
+			}
+			
 			// update the weights in the network
 			for(int k = Driver.network.size() - 1; k >= 0 ; k--){
 				for(Node node : Driver.network.get(k).getNodes()){
@@ -307,11 +297,24 @@ public class Driver {
 				}
 			}
 			
-			// check convergence every 10000 iterations, if the network has not converged, update previous convergence error
-			if((i + 1) % 10000 == 0){
-				Driver.currentConvergenceError = Driver.currentConvergenceError / 10000.0;
+			// check convergence every 1000 iterations, if the network has not converged, update previous convergence error
+			int numIterations = 1000;
+			if((i + 1) % numIterations == 0){
+				// the first division returns avg error over 10,000 iterations, second division returns the avg error for 1 iteration
+				Driver.currentConvergenceError = Driver.currentConvergenceError / numIterations / numIterations;
 				System.out.println("Iter: " + i + "\nChecking convergence...\nPrevious Error: " + Driver.prevConvergenceError + "\nCurrent Error: " + Driver.currentConvergenceError + "\n");
+				
+				// if the weights have converged, return the weights to their previous values
+				int prevWeightIndex = 0;
 				if(Driver.hasConverged()){
+					for(int k = 0; k < Driver.network.size(); k++){
+						for(Node node : Driver.network.get(k).getNodes()){
+							for(int weightIndex = 0; weightIndex < node.inputs[1].length; weightIndex++){
+								node.inputs[1][weightIndex] = Driver.prevWeights.get(prevWeightIndex);
+								prevWeightIndex++;
+							}
+						}
+					}
 					break;
 				}
 				Driver.prevConvergenceError = Driver.currentConvergenceError;
@@ -329,10 +332,11 @@ public class Driver {
 	
 	// checks for error convergence in the network
 	private static boolean hasConverged(){
-		// if our convergence error starts to increase by more than, then we have converged
-		double difference = Driver.prevConvergenceError - Driver.currentConvergenceError;
-		if(Driver.prevConvergenceError != 0 && difference < 0){
-			if(Math.abs(difference) < 0.0001){
+		// if our convergence error starts to increase by more than 0.1, then we have converged
+		double differenceInError = Driver.prevConvergenceError - Driver.currentConvergenceError;
+		if(Driver.prevConvergenceError != 0 && differenceInError < 0){
+			System.out.println("difference: " + differenceInError);
+			if(Math.abs(differenceInError) > 0.1){
 				return true;	
 			}
 		}

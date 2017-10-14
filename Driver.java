@@ -372,7 +372,7 @@ public class Driver {
 	// TIA NEW CLUSTER METHOD
 	// put ArrayList<Double[]> into arraylist (unpack), takes in an arraylist of
 	// data
-	private static ArrayList<Double> cluster(Double data) throws Exception {
+	private static ArrayList<Double> cluster(ArrayList<Double> data) throws Exception {
 		ArrayList<Double> clusters = newArrayList<Double>();
 		Collections.sort(cluster); 
 		int counter = 1;

@@ -5,6 +5,7 @@ package neuralNetScript;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -410,11 +411,60 @@ public class Driver {
 	// returns a set of clusters for rbf
 	private static ArrayList<Double[]> cluster() {
 
-		// sort Driver.sample by distance from origin
-		// divide number of examples by number of clusters to get number of examples per cluster
-		// assign that may datapoints to a group, find average fo each group -> this is the cluster
+		// convert Driver.sample to ArrayList<Double[]>
+		ArrayList<Double[]> sample = new ArrayList<Double[]>();
+		for(int i = 0; i < Driver.sample[0].length; i++){
+			Double[] point = new Double[Driver.sample.length];
+			for(int j = 0; j < point.length; j++){
+				point[j] = Driver.sample[j][i];
+			}
+			sample.add(i, point);
+		}
 		
-		return null;
+		// sort the sample data by distance from origin
+		Collections.sort(sample, new Comparator<Double[]>() {
+		    @Override
+		    public int compare(Double[] datapoint1, Double[] datapoint2) {
+		    	double dist1 = 0, dist2 = 0;
+				for(int coordinate = 0; coordinate < datapoint1.length; coordinate++){
+					dist1 += Math.pow(datapoint1[coordinate], 2);
+					dist2 += Math.pow(datapoint2[coordinate], 2);
+				}
+				dist1 = Math.sqrt(dist1);
+				dist2 = Math.sqrt(dist2);
+		        return Double.compare(dist1, dist2);
+		    }
+		});
+		
+		// average datapoints in each cluster and store in clusters list
+		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
+		int clusterIter = 0;
+		int pointsPerCluster = sample.size() / Driver.k;
+		Double[] averagePoint = new Double[sample.size()];
+		for(int pointIter = 0; pointIter < sample.size(); pointIter++){
+			
+			// store average point in cluster
+			if((pointIter + 1) % pointsPerCluster == 0){
+				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
+					averagePoint[coordinate] = averagePoint[coordinate] / pointsPerCluster;
+				}
+				clusters.add(clusterIter, averagePoint);
+				clusterIter++;
+			}
+			// assign first averagePoint for this cluster
+			else if(pointIter % pointsPerCluster == 0){
+				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
+					averagePoint[coordinate] = sample.get(coordinate)[pointIter];
+				}
+			}
+			// sum average point (divided by num points later)
+			else{
+				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
+					averagePoint[coordinate] += sample.get(coordinate)[pointIter];
+				}
+			}
+		}
+		return clusters;
 	}
 	
 	// given a k and the training set return k centroids that

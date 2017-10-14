@@ -4,6 +4,7 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -155,7 +156,7 @@ public class Driver {
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		if(Driver.networkType.equals("rbf")){
 			Driver.k = Driver.numHiddenLayers.get(0);
-			clusters = kmeans();
+			clusters = cluster();
 			RadialBasisFunction.setSigma(Driver.sigma);
 		}
 		
@@ -384,21 +385,6 @@ public class Driver {
 		}
 	}
 	
-	// return the current average error of the network by testing it on a sample (size = # inputs * 1000)
-//	private static double getAverageError(){
-//		Double[][] sample = Driver.getSample(Driver.numInNodes * 1000);
-//		double avgError = 0;
-//		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
-//			Double[] input = new Double[sample.length - 1];
-//			for(int i = 0; i < input.length; i++){
-//				input[i] = sample[i][datapoint];
-//			}
-//			double[] output = Driver.testNetwork(input);
-//			avgError += output[0] - sample[sample.length - 1][datapoint];
-//		}
-//		return avgError / sample[0].length;
-//	}
-	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
 	private static double[] testNetwork(Double[] input){
 		// set inputs
@@ -421,6 +407,16 @@ public class Driver {
 		return output;
 	}
 
+	// returns a set of clusters for rbf
+	private static ArrayList<Double[]> cluster() {
+
+		// sort Driver.sample by distance from origin
+		// divide number of examples by number of clusters to get number of examples per cluster
+		// assign that may datapoints to a group, find average fo each group -> this is the cluster
+		
+		return null;
+	}
+	
 	// given a k and the training set return k centroids that
 	// define the centers of the clusters
 	private static ArrayList<Double[]> kmeans(){

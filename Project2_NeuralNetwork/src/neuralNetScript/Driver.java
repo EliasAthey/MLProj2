@@ -4,6 +4,7 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 //import pattern;
@@ -36,6 +37,7 @@ public class Driver {
 	
 	// the k-value used for k-means clustering
 	private static int k;
+	private static int kMeansConvergenceTracker = 0; 
 	
 	// the sigma value used for rbf
 	private static final double sigma = 100;
@@ -66,7 +68,8 @@ public class Driver {
 			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
 			
 			Driver.buildNetwork();
-			Driver.trainNetwork();
+			Driver.crossValidation(5);
+			//Driver.trainNetwork();
 		}
 		catch(Exception e){
 			System.out.println("Error...");
@@ -265,13 +268,96 @@ public class Driver {
 		}
 		inputLayer.setNodes(inputNodes);
 	}
+
+	private static void crossValidation(int k) {
+
+		System.out.println("Training network...\n");
+		//start timer
+		double startTime = System.currentTimeMillis();
+		
+		
+		//keeps track of number of times trained, trains k-1 times
+		for (int trainIter = 0; trainIter < k-2; trainIter++) {
+			
+			//loops over all data points
+			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
+				
+				//splits data into k-1 sets 
+				if (sampleIter % k == trainIter) { 
+					
+					//loops over dimensions of each point
+					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+						
+						//assign sample to input nodes
+						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
+						//System.out.println(sampleIter % k);
+					}
+
+					//set the expected output for this sample point
+					Driver.expectedOutput = Driver.sample[Driver.numInNodes][sampleIter];
+					
+					// execute the nodes in the network
+					for(Layer layer : Driver.network){
+						for(Node node : layer.getNodes()){
+							node.execute();
+						}
+					}
+
+					// save previous weights to test convergence
+					Driver.prevWeights = new ArrayList<Double>();
+					for(Layer layer : Driver.network){
+						for(Node node : layer.getNodes()){
+							for(double weight : node.inputs[1]){
+								Driver.prevWeights.add(weight);
+							}
+						}
+					}
+					
+					// update weights in the network
+					for(int updateIter = Driver.network.size() - 1; updateIter >= 0 ; updateIter--){
+						for(Node node : Driver.network.get(updateIter).getNodes()){
+							node.updateWeights();
+						}
+					}
+				}
+			}
+			
+			//test data after every train
+			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
+				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+
+					//test on kth set of data 
+					if (sampleIter % k == k-1) {
+						// set inputs
+						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];;
+						
+					}
+				}
+				// execute the nodes in the network
+				for(Layer layer : Driver.network){
+					for(Node node : layer.getNodes()){
+						node.execute();
+					}
+				}
+				
+				// get computed output from output nodes
+				double[] output = new double[Driver.numOutNodes];
+				for(int i = 0; i < output.length; i++){
+					output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
+				}
+				//TODO
+				//use output to test for convergence and
+				//store outputs to use for convergence slope results graph thing
+			}
+		}
+		
+		// save convergence time
+		//Driver.convergenceTime = System.currentTimeMillis() - startTime;
+		//System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
+	}
 	
 	// input training data into the network, update weights until convergence
 	private static void trainNetwork(){
-		System.out.println("Training network...\n");
-		
-		//start timer
-		double startTime = System.currentTimeMillis();
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
@@ -314,9 +400,6 @@ public class Driver {
 			}
 		}
 		
-		// save convergence time
-		Driver.convergenceTime = System.currentTimeMillis() - startTime;
-		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
 	}
 	
 	// checks for weight convergence in the network
@@ -367,8 +450,11 @@ public class Driver {
 	// given a k and the training set return k centroids that
 	// define the centers of the clusters
 	private static ArrayList<Double[]> kmeans(){
+		
 		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
 		int[] labels = new int[Driver.sample[0].length];
+		int convergenceTracker = 0; 
+		long start = System.currentTimeMillis();
 		
 		// pick initial random data points to be centroids
 		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
@@ -392,7 +478,7 @@ public class Driver {
 			labels = getLabels(centroids);
 			centroids = getNewCentroids(centroids, labels);
 		}while (!stopKmeans(oldCentroids, centroids));
-		
+		System.out.println("kmeans convergence time = " + (System.currentTimeMillis() - start) + " milliseconds");
 		return centroids;
 	}
 	
@@ -479,15 +565,23 @@ public class Driver {
 			
 			for(int arrayIter = 0; arrayIter < centroids.get(index).length ; arrayIter++) {
 				
-				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.01) {
+				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.0001) {
 					flags++;
 				}
 			}
 			index++;
 		}
 
-		if (flags >= (Driver.k * Driver.numInNodes * .85)) {
-			return true;
+		//System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
+
+		if (flags >= (Driver.k * Driver.numInNodes)) {
+			Driver.kMeansConvergenceTracker++;
+			if(Driver.kMeansConvergenceTracker >= 3) {
+				return true;
+			}
+		}
+		else {
+			Driver.kMeansConvergenceTracker = 0;
 		}
 		return false;
 	}

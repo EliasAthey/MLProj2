@@ -4,9 +4,6 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -27,14 +24,6 @@ public class Driver {
 	
 	// the convergence time
 	private static double convergenceTime;
-	
-	// the current convergence error
-	private static double currentConvergenceError = 0;
-	private static int currentIteration = 0;
-	
-	// the previous convergence error
-	private static double prevConvergenceError = 0;
-	private static int prevIteration = 0;
 	
 	// the previous iteration's weights, used upon convergence
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
@@ -87,7 +76,7 @@ public class Driver {
 		}
 		
 		// print some metrics
-		System.out.println("Average Error in Output: " + Driver.getAverageError());
+		System.out.println("Network has been trained and tested.");
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -258,7 +247,6 @@ public class Driver {
 
 		System.out.println("Training network...\n");
 		
-		
 		//keeps track of number of times trained, trains k-1 times
 		for (int trainIter = 0; trainIter < k; trainIter++) {
 
@@ -327,6 +315,17 @@ public class Driver {
 							}
 						}
 					}
+					
+					// revert weights in the network
+					weightIter = 0;
+					for(Layer layer : Driver.network){
+						for(Node node : layer.getNodes()){
+							for(int i = 0; i < node.inputs[1].length; i++){
+								node.inputs[1][i] = Driver.prevWeights.get(weightIter);
+								weightIter++;
+							}
+						}
+					}
 				}
 			}
 			
@@ -350,6 +349,7 @@ public class Driver {
 			
 			// save convergence time (really just training time)
 			Driver.convergenceTime = System.currentTimeMillis() - startTime;
+			System.out.println("\nFold trained in: " + Driver.convergenceTime + " ms.");
 			
 			//test data after every train and determine average error
 			double averageError[] = new double[Driver.numOutNodes];
@@ -378,26 +378,26 @@ public class Driver {
 				//store outputs to use for convergence slope results graph thing
 			}
 
-			// compute average error for this fold
+			// compute average error for this fold, if it has increased, revert the weights
 			averageError[0] = averageError[0] / (Driver.sample[0].length / k);
 			System.out.println(averageError[0]);
 		}
 	}
 	
 	// return the current average error of the network by testing it on a sample (size = # inputs * 1000)
-	private static double getAverageError(){
-		Double[][] sample = Driver.getSample(Driver.numInNodes * 1000);
-		double avgError = 0;
-		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
-			Double[] input = new Double[sample.length - 1];
-			for(int i = 0; i < input.length; i++){
-				input[i] = sample[i][datapoint];
-			}
-			double[] output = Driver.testNetwork(input);
-			avgError += output[0] - sample[sample.length - 1][datapoint];
-		}
-		return avgError / sample[0].length;
-	}
+//	private static double getAverageError(){
+//		Double[][] sample = Driver.getSample(Driver.numInNodes * 1000);
+//		double avgError = 0;
+//		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
+//			Double[] input = new Double[sample.length - 1];
+//			for(int i = 0; i < input.length; i++){
+//				input[i] = sample[i][datapoint];
+//			}
+//			double[] output = Driver.testNetwork(input);
+//			avgError += output[0] - sample[sample.length - 1][datapoint];
+//		}
+//		return avgError / sample[0].length;
+//	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
 	private static double[] testNetwork(Double[] input){

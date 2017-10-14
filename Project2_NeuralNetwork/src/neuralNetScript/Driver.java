@@ -310,32 +310,27 @@ public class Driver {
 			// save convergence time (really just training time)
 			Driver.convergenceTime = System.currentTimeMillis() - startTime;
 			
+			//test data after every train and determine average error
 			double averageError[] = new double[Driver.numOutNodes];
-			//test data after every train
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
-				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
-
-					//test on kth set of data 
-					if (sampleIter % k == trainIter) {
-						// set inputs
-						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];;
-						//set the expected output for this sample point
-						Driver.expectedOutput = Driver.sample[Driver.numInNodes][sampleIter];
-						
-						// execute the nodes in the network
-						for(Layer layer : Driver.network){
-							for(Node node : layer.getNodes()){
-								node.execute();
-							}
-						}
-						
-						// get computed output from output nodes and determine average error
-						double[] output = new double[Driver.numOutNodes];
-						for(int i = 0; i < output.length; i++){
-							output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
-							averageError[i] += (output[i] - Driver.expectedOutput);
-						}
+				
+				//test on kth set of data 
+				if(sampleIter % k == trainIter){
+					
+					// set inputs
+					Double[] inputs = new Double[Driver.numInNodes];
+					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
 					}
+					
+					//set the expected output for this sample point
+					Driver.expectedOutput = Driver.sample[Driver.numInNodes][sampleIter];
+					
+					// test network
+					double[] networkOutput = Driver.testNetwork(inputs);
+					
+					// sum average error
+					averageError[0] += (networkOutput[0] - Driver.expectedOutput);
 				}
 				
 				//TODO
@@ -349,33 +344,6 @@ public class Driver {
 			}
 		}
 	}
-	
-//	// checks for error convergence in the network
-//	private static boolean hasConverged(){
-//		// check convergence using difference in average error
-//		double difference = Driver.prevConvergenceError - Driver.currentConvergenceError;
-//		System.out.print("difference (" + Driver.currentIteration + "): " + difference +"\n\n");
-//		
-//		// if difference is small and positive, we converge
-//		if(Driver.prevConvergenceError != 0 && Math.abs(difference) < 0.01 && difference > 0){
-//			return true;
-//		}
-//		// if the difference is large and negative, we converge and return weights to previous value
-//		else if(Driver.prevConvergenceError != 0 && difference < -10.0){
-//			int prevWeightIndex = 0;
-//			for(int k = 0; k < Driver.network.size(); k++){
-//				for(Node node : Driver.network.get(k).getNodes()){
-//					for(int weightIndex = 0; weightIndex < node.inputs[1].length; weightIndex++){
-//						node.inputs[1][weightIndex] = Driver.prevWeights.get(prevWeightIndex);
-//						prevWeightIndex++;
-//					}
-//				}
-//			}
-//			return true;
-//		}
-//		Driver.prevConvergenceError = Driver.currentConvergenceError;
-//		return false;
-//	}
 	
 	// return the current average error of the network by testing it on a sample (size = # inputs * 1000)
 	private static double getAverageError(){

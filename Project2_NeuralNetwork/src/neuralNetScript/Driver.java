@@ -293,11 +293,11 @@ public class Driver {
 			// check convergence every 1000 iterations, if the network has not converged, update previous convergence error
 			int numIterations = 1000;
 			if((i + 1) % numIterations == 0){
-				// the first division returns avg error over 10,000 iterations, second division returns the avg error for 1 iteration
-				Driver.currentConvergenceError = Driver.currentConvergenceError / numIterations / numIterations;
+				// sets currentConvergence error to average over numIterations
+				Driver.currentConvergenceError = Driver.currentConvergenceError / numIterations;
 				System.out.println("Iter: " + i + "\nChecking convergence...\nPrevious Error: " + Driver.prevConvergenceError + "\nCurrent Error: " + Driver.currentConvergenceError + "\n");
 				
-				// if the weights have converged, return the weights to their previous values
+				// if the weights have converged, return the weights to their previous values and stop looping through samples
 				int prevWeightIndex = 0;
 				if(Driver.hasConverged()){
 					for(int k = 0; k < Driver.network.size(); k++){
@@ -311,6 +311,7 @@ public class Driver {
 					break;
 				}
 				Driver.prevConvergenceError = Driver.currentConvergenceError;
+				Driver.currentConvergenceError = 0;
 			}
 			// sums current convergence errors
 			else{
@@ -320,7 +321,7 @@ public class Driver {
 		
 		// save convergence time
 		Driver.convergenceTime = System.currentTimeMillis() - startTime;
-		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
+		System.out.println("\nNetwork has been trained in " + Driver.convergenceTime + " milliseconds.\n");
 	}
 	
 	// checks for error convergence in the network
@@ -328,6 +329,7 @@ public class Driver {
 		// if our convergence error starts to increase by more than 0.1, then we have converged
 		double differenceInError = Driver.prevConvergenceError - Driver.currentConvergenceError;
 		if(Driver.prevConvergenceError != 0 && differenceInError < 0){
+			System.out.print("difference: " + differenceInError +"\n\n");
 			if(Math.abs(differenceInError) > 0.1){
 				return true;	
 			}

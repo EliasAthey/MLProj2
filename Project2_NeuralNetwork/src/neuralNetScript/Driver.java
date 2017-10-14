@@ -258,11 +258,17 @@ public class Driver {
 			//start convergence timer
 			double startTime = System.currentTimeMillis();
 			
+			// counter for training samples
+			int samplesInFold = 0;
+			
 			//loops over all data points
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
 				
 				//train on k-1 folds
 				if (sampleIter % k != trainIter) { 
+					
+					//increment counter
+					samplesInFold++;
 					
 					//loops over dimensions of each point
 					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
@@ -304,7 +310,7 @@ public class Driver {
 					for(Layer layer : Driver.network){
 						for(Node node : layer.getNodes()){
 							for(double weight : node.inputs[1]){
-								if(sampleIter == 0 || sampleIter == 1){
+								if(samplesInFold == 1){
 									averageWeights.add(weightIter, weight);
 								}
 								else{
@@ -334,7 +340,7 @@ public class Driver {
 			// average the weights
 			for(int weightIter = 0; weightIter < averageWeights.size(); weightIter++){
 				Double weight = averageWeights.get(weightIter);
-				weight = weight / Driver.sample[0].length;
+				weight = weight / samplesInFold;
 				averageWeights.remove(weightIter);
 				averageWeights.add(weightIter, weight);
 			}
@@ -345,6 +351,7 @@ public class Driver {
 				for(Node node : layer.getNodes()){
 					for(int i = 0; i < node.inputs[1].length; i++){
 						node.inputs[1][i] = averageWeights.get(weightIter);
+						weightIter++;
 					}
 				}
 			}

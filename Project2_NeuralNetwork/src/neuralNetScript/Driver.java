@@ -258,9 +258,13 @@ public class Driver {
 
 		System.out.println("Training network...\n");
 		
+		
 		//keeps track of number of times trained, trains k-1 times
 		for (int trainIter = 0; trainIter < k; trainIter++) {
 
+			// a list of all weights, will hold the average weights of all iterations in one fold
+			ArrayList<Double> averageWeights = new ArrayList<Double>();
+			
 			//start convergence timer
 			double startTime = System.currentTimeMillis();
 			
@@ -288,7 +292,7 @@ public class Driver {
 						}
 					}
 
-					// save previous weights to test convergence
+					// save previous weights to revert the updated weights for this iteration
 					Driver.prevWeights = new ArrayList<Double>();
 					for(Layer layer : Driver.network){
 						for(Node node : layer.getNodes()){
@@ -303,6 +307,43 @@ public class Driver {
 						for(Node node : Driver.network.get(updateIter).getNodes()){
 							node.updateWeights();
 						}
+					}
+					
+					// add updated weights to the list of average weights
+					int weightIter = 0;
+					for(Layer layer : Driver.network){
+						for(Node node : layer.getNodes()){
+							for(double weight : node.inputs[1]){
+								if(sampleIter == 0 || sampleIter == 1){
+									averageWeights.add(weightIter, weight);
+								}
+								else{
+									Double summedWeight = averageWeights.get(weightIter);
+									summedWeight += weight;
+									averageWeights.remove(weightIter);
+									averageWeights.add(weightIter, summedWeight);
+								}
+								weightIter++;
+							}
+						}
+					}
+				}
+			}
+			
+			// average the weights
+			for(int weightIter = 0; weightIter < averageWeights.size(); weightIter++){
+				Double weight = averageWeights.get(weightIter);
+				weight = weight / Driver.sample[0].length;
+				averageWeights.remove(weightIter);
+				averageWeights.add(weightIter, weight);
+			}
+			
+			// assign the averaged weights to the network
+			int weightIter = 0;
+			for(Layer layer : Driver.network){
+				for(Node node : layer.getNodes()){
+					for(int i = 0; i < node.inputs[1].length; i++){
+						node.inputs[1][i] = averageWeights.get(weightIter);
 					}
 				}
 			}

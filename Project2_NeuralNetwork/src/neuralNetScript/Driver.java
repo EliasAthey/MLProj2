@@ -282,21 +282,16 @@ public class Driver {
 			//loops over all data points
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
 				
-				//loops over dimensions of each point
-				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+				//splits data into k-1 sets 
+				if (sampleIter % k == trainIter) { 
 					
-					//splits data into k-1 sets 
-					if (sampleIter % k == trainIter) { 
+					//loops over dimensions of each point
+					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
 						
 						//assign sample to input nodes
 						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
 						//System.out.println(sampleIter % k);
 					}
-					
-				}
-				
-				//splits data into k-1 sets 
-				if (sampleIter % k == trainIter) { 
 
 					//set the expected output for this sample point
 					Driver.expectedOutput = Driver.sample[Driver.numInNodes][sampleIter];

@@ -27,9 +27,11 @@ public class Driver {
 	
 	// the current convergence error
 	private static double currentConvergenceError = 0;
+	private static int currentIteration = 0;
 	
 	// the previous convergence error
 	private static double prevConvergenceError = 0;
+	private static int prevIteration = 0;
 	
 	// the previous iteration's weights, used upon convergence
 	private static ArrayList<Double> prevWeights = new ArrayList<Double>();
@@ -295,6 +297,7 @@ public class Driver {
 			if((i + 1) % numIterations == 0){
 				// sets currentConvergence error to average over numIterations
 				Driver.currentConvergenceError = Driver.currentConvergenceError / numIterations;
+				Driver.currentIteration = i;
 				System.out.println("Iter: " + i + "\nChecking convergence...\nPrevious Error: " + Driver.prevConvergenceError + "\nCurrent Error: " + Driver.currentConvergenceError + "\n");
 				
 				// if the weights have converged, return the weights to their previous values and stop looping through samples
@@ -313,9 +316,10 @@ public class Driver {
 				Driver.prevConvergenceError = Driver.currentConvergenceError;
 				Driver.currentConvergenceError = 0;
 			}
-			// sums current convergence errors
-			else{
+			// get latest convergence every 1000 iterations, starting at the 500th
+			else if ((i + 1 + numIterations / 2) % numIterations == 0){
 				Driver.currentConvergenceError += Driver.getAverageError();
+				Driver.prevIteration = i;
 			}
 		}
 		
@@ -327,12 +331,10 @@ public class Driver {
 	// checks for error convergence in the network
 	private static boolean hasConverged(){
 		// if our convergence error starts to increase by more than 0.1, then we have converged
-		double differenceInError = Driver.prevConvergenceError - Driver.currentConvergenceError;
-		if(Driver.prevConvergenceError != 0 && differenceInError < 0){
-			System.out.print("difference: " + differenceInError +"\n\n");
-			if(Math.abs(differenceInError) > 0.1){
-				return true;	
-			}
+		double slope = (Driver.prevIteration - Driver.currentIteration) / (Driver.prevConvergenceError - Driver.currentConvergenceError);
+		System.out.print("slope: " + slope +"\n\n");
+		if(Driver.prevConvergenceError != 0 && slope > 1){
+			return true;
 		}
 		return false;
 	}

@@ -440,12 +440,12 @@ public class Driver {
 		ArrayList<Double[]> clusters = new ArrayList<Double[]>();
 		int clusterIter = 0;
 		int pointsPerCluster = sample.size() / Driver.k;
-		Double[] averagePoint = new Double[sample.size()];
+		Double[] averagePoint = new Double[sample.get(0).length];
 		for(int pointIter = 0; pointIter < sample.size(); pointIter++){
 			
 			// store average point in cluster
 			if((pointIter + 1) % pointsPerCluster == 0){
-				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
+				for(int coordinate = 0; coordinate < sample.get(0).length; coordinate++){
 					averagePoint[coordinate] = averagePoint[coordinate] / pointsPerCluster;
 				}
 				clusters.add(clusterIter, averagePoint);
@@ -453,14 +453,14 @@ public class Driver {
 			}
 			// assign first averagePoint for this cluster
 			else if(pointIter % pointsPerCluster == 0){
-				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
-					averagePoint[coordinate] = sample.get(coordinate)[pointIter];
+				for(int coordinate = 0; coordinate < sample.get(0).length; coordinate++){
+					averagePoint[coordinate] = sample.get(pointIter)[coordinate];
 				}
 			}
 			// sum average point (divided by num points later)
 			else{
-				for(int coordinate = 0; coordinate < sample.size(); coordinate++){
-					averagePoint[coordinate] += sample.get(coordinate)[pointIter];
+				for(int coordinate = 0; coordinate < sample.get(0).length; coordinate++){
+					averagePoint[coordinate] += sample.get(pointIter)[coordinate];
 				}
 			}
 		}

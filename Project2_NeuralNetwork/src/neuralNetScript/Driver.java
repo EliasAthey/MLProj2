@@ -4,9 +4,6 @@
 package neuralNetScript;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-//import pattern;
 
 /**
  * @author Elias Athey, Tia Smith, Aaron McCarthy
@@ -28,8 +25,11 @@ public class Driver {
 	// the convergence time
 	private static double convergenceTime;
 	
-	// the weights of the network ont he previous iteration of updating weights
-	private static ArrayList<Double> prevWeights;
+	// the current convergence error
+	private static double currentConvergenceError = 0;
+	
+	// the previous convergence error
+	private static double prevConvergenceError = 0;
 	
 	// the training sample
 	private static Double[][] sample;
@@ -63,7 +63,7 @@ public class Driver {
 		Driver.numOutNodes = Integer.parseInt(layers[(layers.length - 1)]);
 		
 		try{
-			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 1000);
+			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 100000);
 			
 			Driver.buildNetwork();
 			Driver.trainNetwork();
@@ -103,7 +103,7 @@ public class Driver {
 	}
 	
 	// return a sample dataset of the Rosenbrock function
-	// [m][n] contains m data points, each with n-1 inputs and 1 output
+	// [m][n] contains n data points, each with m-1 inputs and 1 output at last index
 	private static Double[][] getSample(int size){
 		Double[][] outputs = new Double[Driver.numInNodes + 1][size];
 		
@@ -283,7 +283,7 @@ public class Driver {
 		
 		// iterate through each sample point or until convergence
 		for(int i = 0; i < Driver.sample[0].length; i++){
-			System.out.println("Sample Iteration: " + i);
+			//System.out.println("Sample Iteration: " + i);
 			// set inputs for input nodes
 			int j = 0;
 			while(j < Driver.sample.length - 1){
@@ -301,24 +301,25 @@ public class Driver {
 				}
 			}
 			
-			// save previous weights to test convergence, then update the weights in the network
-			Driver.prevWeights = new ArrayList<Double>();
-			for(Layer layer : Driver.network){
-				for(Node node : layer.getNodes()){
-					for(double weight : node.inputs[1]){
-						Driver.prevWeights.add(weight);
-					}
-				}
-			}
+			// update the weights in the network
 			for(int k = Driver.network.size() - 1; k >= 0 ; k--){
 				for(Node node : Driver.network.get(k).getNodes()){
 					node.updateWeights();
 				}
 			}
 			
-			// check convergence
-			if(Driver.hasConverged()){
-				break;
+			// check convergence every 10000 iterations, if the network has not converged, update previous convergence error
+			if((i + 1) % 10000 == 0){
+				Driver.currentConvergenceError = Driver.currentConvergenceError / 10000.0;
+				System.out.println("Checking convergence...\nPrevious: " + Driver.prevConvergenceError + "\nCurrent: " + Driver.currentConvergenceError + "\n");
+				if(Driver.hasConverged()){
+					break;
+				}
+				Driver.prevConvergenceError = Driver.currentConvergenceError;
+			}
+			// sums current convergence errors
+			else{
+				Driver.currentConvergenceError += Driver.getAverageError();
 			}
 		}
 		
@@ -327,27 +328,31 @@ public class Driver {
 		System.out.println("Network has been trained in " + Driver.convergenceTime + " milliseconds.\n");
 	}
 	
-	// checks for weight convergence in the network
+	// checks for error convergence in the network
 	private static boolean hasConverged(){
-		// get current weights
-		ArrayList<Double> allWeights = new ArrayList<Double>();
-		for(Layer layer : Driver.network){
-			for(Node node : layer.getNodes()){
-				for(double weight : node.inputs[1]){
-					allWeights.add(weight);
-				}
+		// if our convergence error starts to increase by more than, then we have converged
+		double difference = Driver.prevConvergenceError - Driver.currentConvergenceError;
+		if(Driver.prevConvergenceError != 0 && difference < 0){
+			if(Math.abs(difference) < 0.0001){
+				return true;	
 			}
 		}
-		
-		// check convergence of weights to 3 decimal places
-		boolean hasConverged = true;
-		for(int i = 0; i < allWeights.size(); i++){
-			if(!hasConverged){
-				break;
+		return false;
+	}
+	
+	// return the current average error of the network by testing it on a sample (size = # inputs * 1000)
+	private static double getAverageError(){
+		Double[][] sample = Driver.getSample(Driver.numInNodes * 1000);
+		double avgError = 0;
+		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
+			Double[] input = new Double[sample.length - 1];
+			for(int i = 0; i < sample.length - 1; i++){
+				input[i] = sample[i][datapoint];
 			}
-			hasConverged &= (int)(allWeights.get(i) * 1000) == (int)(Driver.prevWeights.get(i) * 1000);
+			double[] output = Driver.testNetwork(input);
+			avgError += Math.abs(output[0] - sample[sample.length - 1][datapoint]);
 		}
-		return hasConverged;
+		return avgError / (double)sample[0].length;
 	}
 	
 	// given an input vector, return the output of the network as the approximation of the Rosenbrock function
@@ -389,14 +394,14 @@ public class Driver {
 			centroids.add(randCentroid);
 		}
 		
-		int iterations = 0;
+//		int iterations = 0;
 		ArrayList<Double[]> oldCentroids = null;
 		
 		do{
 			
 			// save old for convergence test
 			oldCentroids = centroids;
-			iterations ++;
+//			iterations ++;
 			labels = getLabels(centroids);
 			centroids = getNewCentroids(centroids, labels);
 		}while (!stopKmeans(oldCentroids, centroids));

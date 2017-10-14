@@ -10,7 +10,7 @@ package neuralNetScript;
 class BackpropFinalWeightFunction implements IWeightFunction {
 	 
 	//Ada, the learning rate
-	private double learningRate = 0.000001;
+	private double learningRate = 0.001;
 
 	// updates the weights using the backpropagation rule for output nodes
 	@Override

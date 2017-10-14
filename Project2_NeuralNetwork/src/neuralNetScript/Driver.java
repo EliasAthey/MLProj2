@@ -87,7 +87,7 @@ public class Driver {
 		}
 		
 		// print some metrics
-		System.out.println("Average Error in Output: " + Driver.getAverageError());
+		System.out.println("Final Squared Error: " + Driver.getSquaredError());
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -98,7 +98,7 @@ public class Driver {
 		// generate *size number of sample data points
 		for(int setIter = 0; setIter < size; setIter++) {
 			// generate random inputs from -rangeScale to +rangeScale
-			int rangeScale = 10;
+			int rangeScale = 3;
 			ArrayList<Double> inputs = new ArrayList<Double>();
 			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
 				inputs.add(inputIter, Math.random() * Math.pow(-1, (int)Math.random() * 2) * rangeScale);
@@ -258,8 +258,8 @@ public class Driver {
 
 		System.out.println("Training network...\n");
 		
-		//keeps track of number of times trained, trains k-1 times
-		for (int trainIter = 0; trainIter < k-2; trainIter++) {
+//		//keeps track of number of times trained, trains k times
+//		for (int trainIter = 0; trainIter < k; trainIter++) {
 
 			//start convergence timer
 			double startTime = System.currentTimeMillis();
@@ -267,8 +267,8 @@ public class Driver {
 			//loops over all data points
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
 				
-				//splits data into k-1 sets 
-				if (sampleIter % k == trainIter) { 
+//				//splits data into k-1 sets 
+//				if (sampleIter % k == trainIter) { 
 					
 					//loops over dimensions of each point
 					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
@@ -304,65 +304,69 @@ public class Driver {
 							node.updateWeights();
 						}
 					}
-				}
+					System.out.println("      Squared Error: " + Driver.getSquaredError());
+
+					// test for convergence every 1000 iterations 
+//					int numIterations = 1000;
+//					if(((int)(sampleIter / 5) + 1 ) % numIterations == 0){
+//						Driver.currentConvergenceError = Driver.getSquaredError();
+//						Driver.currentIteration = sampleIter;
+//						// check convergence
+//						if(Driver.hasConverged()){
+//							break;
+//						}
+//					}
+//					Driver.prevConvergenceError = Driver.currentConvergenceError;
+//				}
 			}
 			
-			//test data after every train
-			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
-				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
-
-					//test on kth set of data 
-					if (sampleIter % k == k-1) {
-						// set inputs
-						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];;
-						
-					}
-				}
-				// execute the nodes in the network
-				for(Layer layer : Driver.network){
-					for(Node node : layer.getNodes()){
-						node.execute();
-					}
-				}
-				
-				// get computed output from output nodes
-				double[] output = new double[Driver.numOutNodes];
-				for(int i = 0; i < output.length; i++){
-					output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
-				}
-				
-				
-				// test for convergence every 1000 iterations 
-				Driver.currentIteration = sampleIter;
-				int numIterations = 1000;
-				if((sampleIter + 1) % numIterations == 0 && Driver.hasConverged()){
-					break;
-				}
-				else if ((sampleIter + 1 + numIterations / 2) % numIterations == 0){
-					Driver.currentConvergenceError = Driver.getAverageError();
-					Driver.prevIteration = sampleIter;
-				}
-				// save convergence time
-				Driver.convergenceTime = System.currentTimeMillis() - startTime;
+			// save convergence time
+			Driver.convergenceTime = System.currentTimeMillis() - startTime;
+//			System.out.println("Fold " + trainIter + " converged in " + Driver.convergenceTime + " ms.\n");
+			
+			//test data after every train using all other folds
+//			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
+//				if (sampleIter % k != trainIter) {
+//					
+//					// set inputs
+//					for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++) {
+//						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];;
+//					}
+//					
+//					// execute the nodes in the network
+//					for(Layer layer : Driver.network){
+//						for(Node node : layer.getNodes()){
+//							node.execute();
+//						}
+//					}
+//					
+//					// get computed output from output nodes
+//					double[] output = new double[Driver.numOutNodes];
+//					for(int i = 0; i < output.length; i++){
+//						output[i] = Driver.network.get(Driver.network.size() - 1).getNodes()[i].getComputedOutput();
+//					}
+//				}
 				
 				//TODO
 				//store outputs to use for convergence slope results graph thing
-			}
-		}
+//			}
+//		}
 	}
 	
 	// checks for error convergence in the network
 	private static boolean hasConverged(){
 		// check convergence using difference in average error
 		double difference = Driver.prevConvergenceError - Driver.currentConvergenceError;
-		System.out.print("difference (" + Driver.currentIteration + "): " + difference +"\n\n");
+		System.out.print("   prev conv error: " + Driver.prevConvergenceError + "\ncurrent conv error: " + Driver.currentConvergenceError + "\n\n");
 		
 		// if difference is small and positive, we converge
 		if(Driver.prevConvergenceError != 0 && Math.abs(difference) < 0.01 && difference > 0){
+			System.out.println("Converged due to small decrease (< 0.01) in error\n");
 			return true;
 		}
 		// if the difference is large and negative, we converge and return weights to previous value
-		else if(Driver.prevConvergenceError != 0 && difference < -10.0){
+		else if(Driver.prevConvergenceError != 0 && difference < -1000000000000.0){
+			System.out.println("Converged due to large increase (> 1000000000000.0) in error\n");
 			int prevWeightIndex = 0;
 			for(int k = 0; k < Driver.network.size(); k++){
 				for(Node node : Driver.network.get(k).getNodes()){
@@ -374,12 +378,11 @@ public class Driver {
 			}
 			return true;
 		}
-		Driver.prevConvergenceError = Driver.currentConvergenceError;
 		return false;
 	}
 	
 	// return the current average error of the network by testing it on a sample (size = # inputs * 1000)
-	private static double getAverageError(){
+	private static double getSquaredError(){
 		Double[][] sample = Driver.getSample(Driver.numInNodes * 1000);
 		double avgError = 0;
 		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
@@ -388,7 +391,7 @@ public class Driver {
 				input[i] = sample[i][datapoint];
 			}
 			double[] output = Driver.testNetwork(input);
-			avgError += Math.abs(output[0] - sample[sample.length - 1][datapoint]);
+			avgError += Math.pow(output[0] - sample[sample.length - 1][datapoint], 2);
 		}
 		return avgError / sample[0].length;
 	}

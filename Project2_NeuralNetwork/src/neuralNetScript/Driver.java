@@ -325,19 +325,10 @@ public class Driver {
 					
 					// revert weights in the network
 					weightIter = 0;
-					int layerIter = -1;
 					for(Layer layer : Driver.network){
-						layerIter++;
 						for(Node node : layer.getNodes()){
 							for(int i = 0; i < node.inputs[1].length; i++){
 								node.inputs[1][i] = Driver.prevWeights.get(weightIter);
-								if(trainIter == 0 && layerIter != 0){
-									int sign = 1;
-									if(Math.random() < 0.5){
-										sign = -1;
-									}
-									node.inputs[1][i] = sign * (Math.random() * 0.5);
-								}
 								weightIter++;
 							}
 						}

@@ -18,6 +18,6 @@ class SigmoidalFunction implements INodeFunction {
 			sum += (inputs[0][i] * inputs[1][i]);
 		}
 		// return hyperbolic tangent
-		return Math.tanh(sum);
+		return Math.tanh(sum) + 1.0;
 	}
 }

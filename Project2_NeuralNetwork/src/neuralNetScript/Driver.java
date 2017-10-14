@@ -467,142 +467,161 @@ public class Driver {
 		return clusters;
 	}
 	
-	// given a k and the training set return k centroids that
-	// define the centers of the clusters
-	private static ArrayList<Double[]> kmeans(){
-		
-		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
-		int[] labels = new int[Driver.sample[0].length];
-		int convergenceTracker = 0; 
-		long start = System.currentTimeMillis();
-		
-		// pick initial random data points to be centroids
-		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
-			Double[] randCentroid = new Double[Driver.numInNodes];
-			int randIndex = (int) (Math.random() * Driver.sample[0].length);
-			
-			for(int randSampler = 0; randSampler < Driver.numInNodes; randSampler++) {
-				randCentroid[randSampler] = sample[randSampler] [randIndex]; 
-			}
-			centroids.add(randCentroid);
-		}
-		
-//		int iterations = 0;
-		ArrayList<Double[]> oldCentroids = null;
-		
-		do{
-			
-			// save old for convergence test
-			oldCentroids = centroids;
-//			iterations ++;
-			labels = getLabels(centroids);
-			centroids = getNewCentroids(centroids, labels);
-		}while (!stopKmeans(oldCentroids, centroids));
-		System.out.println("kmeans convergence time = " + (System.currentTimeMillis() - start) + " milliseconds");
-		return centroids;
-	}
 	
-	// assigns a label for every datapoint in the sample set
-	// uses distance function to find closest centroid
-	// label is index of centroid in centroids[]
-	private static int[] getLabels(ArrayList<Double[]> centroids) {
-		
-		int[] labels = new int[Driver.sample[0].length];
-		Double[] distances = new Double[Driver.k];
-		Double sum = null;
-		
-		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
-			
-			for (int centroidIter = 0; centroidIter < Driver.k; centroidIter++) {//loop thru centroids
-				sum = (double) 0;
-				
-				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++){//loop thru dimensions of centroids
-					//sum for Euclidean distance function
-					sum += Math.pow(Driver.sample[dimensionIter][sampleIter] - centroids.get(centroidIter)[dimensionIter], 2);
-				}
-				//calc distance to each centroid from each sample
-				distances[centroidIter] = Math.sqrt(sum);
-			}
-			//store index of min distance in labels
-			labels[sampleIter] = findMin(distances);
-		}
-		return labels;
-	}
 	
-	// calculate geometric mean of all sample points with a common label
-	// make this point a new centroid
-	// dimensionSums[l][d] holds the label, [l] with the sum of all 
-	// dimensions of all samples with that label, [d]
-	private static ArrayList<Double[]> getNewCentroids(ArrayList<Double[]> centroids, int[] labels) {
-		
-		
-		ArrayList<Double[]> newCentroids = new ArrayList<Double[]>(Driver.k);
-		int[] labelDivisors = new int[Driver.k];
-		Double[][] dimensionSums = new Double[Driver.k][Driver.numInNodes];
-		// initialize dimensionSums to 0
-		for (int i = 0; i < dimensionSums.length; i++) {
-			for (int x = 0; x < dimensionSums[0].length; x++) {
-				dimensionSums[i][x] = (double) 0;
-			}
-		}
-		
-		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
-			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
-				
-				dimensionSums[labels[sampleIter]][dimIter] += Driver.sample[dimIter][sampleIter];
-				labelDivisors[labels[sampleIter]] ++;
-			}
-		}
-		
-		for(int labelIter = 0; labelIter < Driver.k; labelIter++) {
-			Double[] newCent = new Double[Driver.numInNodes];
-			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
-
-				newCent[dimIter] = dimensionSums[labelIter][dimIter] / labelDivisors[labelIter];
-			}
-			newCentroids.add(labelIter, newCent);
-		}
-		return newCentroids;
-	}
-
-	// determines the minimum value in the distance array
-	private static int findMin(Double[] distanceArray) {
-		int minIndex = 0;
-		for(int index = 1; index < distanceArray.length; index++) {
-			if (distanceArray[minIndex] > distanceArray[index]) {
-				minIndex = index;
-			}
-		}
-		return minIndex;
-	}
 	
-	// a convergence test for the k-means algorithm that returns true if the cluster vectors have converged
-	private static boolean stopKmeans(ArrayList<Double[]> centroids, ArrayList<Double[]> oldCentroids) {
-		
-		int index = 0;
-		int flags = 0;
-		while(centroids.size() > index) {
-			
-			for(int arrayIter = 0; arrayIter < centroids.get(index).length ; arrayIter++) {
-				
-				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.0001) {
-					flags++;
-				}
-			}
-			index++;
-		}
-
-		//System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
-
-		if (flags >= (Driver.k * Driver.numInNodes)) {
-			Driver.kMeansConvergenceTracker++;
-			if(Driver.kMeansConvergenceTracker >= 3) {
-				return true;
-			}
-		}
-		else {
-			Driver.kMeansConvergenceTracker = 0;
-		}
-		return false;
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+	 * Below is K-Means functionality. To be used in a later project.
+	 */
+	
+	
+//******************************************************************************************************************//
+	
+//	// given a k and the training set return k centroids that
+//	// define the centers of the clusters
+//	private static ArrayList<Double[]> kmeans(){
+//		
+//		ArrayList<Double[]> centroids = new ArrayList<Double[]>(Driver.k);
+//		int[] labels = new int[Driver.sample[0].length];
+//		int convergenceTracker = 0; 
+//		long start = System.currentTimeMillis();
+//		
+//		// pick initial random data points to be centroids
+//		for(int randClusterIter = 0; randClusterIter < Driver.k; randClusterIter++) {
+//			Double[] randCentroid = new Double[Driver.numInNodes];
+//			int randIndex = (int) (Math.random() * Driver.sample[0].length);
+//			
+//			for(int randSampler = 0; randSampler < Driver.numInNodes; randSampler++) {
+//				randCentroid[randSampler] = sample[randSampler] [randIndex]; 
+//			}
+//			centroids.add(randCentroid);
+//		}
+//		
+////		int iterations = 0;
+//		ArrayList<Double[]> oldCentroids = null;
+//		
+//		do{
+//			
+//			// save old for convergence test
+//			oldCentroids = centroids;
+////			iterations ++;
+//			labels = getLabels(centroids);
+//			centroids = getNewCentroids(centroids, labels);
+//		}while (!stopKmeans(oldCentroids, centroids));
+//		System.out.println("kmeans convergence time = " + (System.currentTimeMillis() - start) + " milliseconds");
+//		return centroids;
+//	}
+//	
+//	// assigns a label for every datapoint in the sample set
+//	// uses distance function to find closest centroid
+//	// label is index of centroid in centroids[]
+//	private static int[] getLabels(ArrayList<Double[]> centroids) {
+//		
+//		int[] labels = new int[Driver.sample[0].length];
+//		Double[] distances = new Double[Driver.k];
+//		Double sum = null;
+//		
+//		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
+//			
+//			for (int centroidIter = 0; centroidIter < Driver.k; centroidIter++) {//loop thru centroids
+//				sum = (double) 0;
+//				
+//				for (int dimensionIter = 0; dimensionIter < Driver.numInNodes; dimensionIter++){//loop thru dimensions of centroids
+//					//sum for Euclidean distance function
+//					sum += Math.pow(Driver.sample[dimensionIter][sampleIter] - centroids.get(centroidIter)[dimensionIter], 2);
+//				}
+//				//calc distance to each centroid from each sample
+//				distances[centroidIter] = Math.sqrt(sum);
+//			}
+//			//store index of min distance in labels
+//			labels[sampleIter] = findMin(distances);
+//		}
+//		return labels;
+//	}
+//	
+//	// calculate geometric mean of all sample points with a common label
+//	// make this point a new centroid
+//	// dimensionSums[l][d] holds the label, [l] with the sum of all 
+//	// dimensions of all samples with that label, [d]
+//	private static ArrayList<Double[]> getNewCentroids(ArrayList<Double[]> centroids, int[] labels) {
+//		
+//		
+//		ArrayList<Double[]> newCentroids = new ArrayList<Double[]>(Driver.k);
+//		int[] labelDivisors = new int[Driver.k];
+//		Double[][] dimensionSums = new Double[Driver.k][Driver.numInNodes];
+//		// initialize dimensionSums to 0
+//		for (int i = 0; i < dimensionSums.length; i++) {
+//			for (int x = 0; x < dimensionSums[0].length; x++) {
+//				dimensionSums[i][x] = (double) 0;
+//			}
+//		}
+//		
+//		for(int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {//loop thru samples
+//			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
+//				
+//				dimensionSums[labels[sampleIter]][dimIter] += Driver.sample[dimIter][sampleIter];
+//				labelDivisors[labels[sampleIter]] ++;
+//			}
+//		}
+//		
+//		for(int labelIter = 0; labelIter < Driver.k; labelIter++) {
+//			Double[] newCent = new Double[Driver.numInNodes];
+//			for(int dimIter = 0; dimIter < Driver.numInNodes; dimIter++) {//loop thru dimensions of each sample
+//
+//				newCent[dimIter] = dimensionSums[labelIter][dimIter] / labelDivisors[labelIter];
+//			}
+//			newCentroids.add(labelIter, newCent);
+//		}
+//		return newCentroids;
+//	}
+//
+//	// determines the minimum value in the distance array
+//	private static int findMin(Double[] distanceArray) {
+//		int minIndex = 0;
+//		for(int index = 1; index < distanceArray.length; index++) {
+//			if (distanceArray[minIndex] > distanceArray[index]) {
+//				minIndex = index;
+//			}
+//		}
+//		return minIndex;
+//	}
+//	
+//	// a convergence test for the k-means algorithm that returns true if the cluster vectors have converged
+//	private static boolean stopKmeans(ArrayList<Double[]> centroids, ArrayList<Double[]> oldCentroids) {
+//		
+//		int index = 0;
+//		int flags = 0;
+//		while(centroids.size() > index) {
+//			
+//			for(int arrayIter = 0; arrayIter < centroids.get(index).length ; arrayIter++) {
+//				
+//				if (centroids.get(index)[arrayIter] - (oldCentroids.get(index)[arrayIter]) < 0.0001) {
+//					flags++;
+//				}
+//			}
+//			index++;
+//		}
+//
+//		//System.out.println(Driver.kMeansConvergenceTracker + " num flags: " + flags);
+//
+//		if (flags >= (Driver.k * Driver.numInNodes)) {
+//			Driver.kMeansConvergenceTracker++;
+//			if(Driver.kMeansConvergenceTracker >= 3) {
+//				return true;
+//			}
+//		}
+//		else {
+//			Driver.kMeansConvergenceTracker = 0;
+//		}
+//		return false;
+//	}
 }

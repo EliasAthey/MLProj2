@@ -90,10 +90,11 @@ public class Driver {
 		
 		// generate *size number of sample data points
 		for(int setIter = 0; setIter < size; setIter++) {
-			// generate random inputs
+			// generate random inputs from -rangeScale to +rangeScale
+			int rangeScale = 10;
 			ArrayList<Double> inputs = new ArrayList<Double>();
 			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
-				inputs.add(inputIter, Math.random() * 10);
+				inputs.add(inputIter, Math.random() * Math.pow(-1, (int)Math.random() * 2) * rangeScale);
 				outputs[inputIter][setIter] = inputs.get(inputIter);
 			}
 			
@@ -149,15 +150,7 @@ public class Driver {
 		Node[] outputNodes = new Node[Driver.numOutNodes];
 		for(int i = 0; i < outputNodes.length; i++){
 			// set the node functions for output nodes
-			switch(Driver.networkType){
-				case "rbf":
-					outputNodes[i] = new Node(new NoFunction(), new BackpropFinalWeightFunction(), new Node[0]);
-					break;
-				case "mlp": 
-					outputNodes[i] = new Node(new PerceptronOutFunction(), new BackpropFinalWeightFunction(), new Node[0]);
-					break;
-				default: throw new Exception("The specified network type is not defined.");
-			}
+			outputNodes[i] = new Node(new NoFunction(), new BackpropFinalWeightFunction(), new Node[0]);
 			outputNodes[i].setLayerIndex(i);
 		}
 		outputLayer.setNodes(outputNodes);
@@ -335,7 +328,6 @@ public class Driver {
 		// if our convergence error starts to increase by more than 0.1, then we have converged
 		double differenceInError = Driver.prevConvergenceError - Driver.currentConvergenceError;
 		if(Driver.prevConvergenceError != 0 && differenceInError < 0){
-			System.out.println("difference: " + differenceInError);
 			if(Math.abs(differenceInError) > 0.1){
 				return true;	
 			}
@@ -349,7 +341,7 @@ public class Driver {
 		double avgError = 0;
 		for(int datapoint = 0; datapoint < sample[0].length; datapoint++){
 			Double[] input = new Double[sample.length - 1];
-			for(int i = 0; i < sample.length - 1; i++){
+			for(int i = 0; i < input.length; i++){
 				input[i] = sample[i][datapoint];
 			}
 			double[] output = Driver.testNetwork(input);

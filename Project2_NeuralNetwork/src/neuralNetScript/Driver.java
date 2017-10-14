@@ -259,7 +259,7 @@ public class Driver {
 		System.out.println("Training network...\n");
 		
 		//keeps track of number of times trained, trains k-1 times
-		for (int trainIter = 0; trainIter < k-2; trainIter++) {
+		for (int trainIter = 0; trainIter < k; trainIter++) {
 
 			//start convergence timer
 			double startTime = System.currentTimeMillis();
@@ -307,6 +307,9 @@ public class Driver {
 				}
 			}
 			
+			// save convergence time (really just training time)
+			Driver.convergenceTime = System.currentTimeMillis() - startTime;
+			
 			double averageError[] = new double[Driver.numOutNodes];
 			//test data after every train
 			for (int sampleIter = 0; sampleIter < Driver.sample[0].length; sampleIter++) {
@@ -335,30 +338,14 @@ public class Driver {
 					}
 				}
 				
-				// compute average error for this fold
-				for(int errorIter = 0; errorIter < averageError.length; errorIter++){
-					averageError[errorIter] = averageError[errorIter] / Driver.sample[0].length / k;
-				}
-				
-				// save convergence time
-				Driver.convergenceTime = System.currentTimeMillis() - startTime;
-//				
-//				
-//				
-//				// test for convergence every 1000 iterations 
-//				Driver.currentIteration = sampleIter;
-//				int numIterations = 1000;
-//				if((sampleIter + 1) % numIterations == 0 && Driver.hasConverged()){
-//					break;
-//				}
-//				else if ((sampleIter + 1 + numIterations / 2) % numIterations == 0){
-//					Driver.currentConvergenceError = Driver.getAverageError();
-//					Driver.prevIteration = sampleIter;
-//				}
-				
-				
 				//TODO
 				//store outputs to use for convergence slope results graph thing
+			}
+
+			// compute average error for this fold
+			for(int errorIter = 0; errorIter < averageError.length; errorIter++){
+				averageError[errorIter] = averageError[errorIter] / Driver.sample[0].length / k;
+				System.out.println(averageError[errorIter]);
 			}
 		}
 	}

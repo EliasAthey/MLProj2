@@ -10,7 +10,7 @@ package neuralNetScript;
 class BackpropHiddenWeightFunction implements IWeightFunction {
 
 	// Ada, the learning rate
-	private double learningRate = 0.001;
+	private double learningRate = 0.05;
 	
 	// updates the weights using the backpropagation rule for hidden nodes
 	@Override

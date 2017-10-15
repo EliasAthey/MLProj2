@@ -38,7 +38,7 @@ public class Driver {
 	private static int kMeansConvergenceTracker = 0; 
 	
 	// the sigma value used for rbf
-	private static final double sigma = 100;
+	private static final double sigma = 40;
 	
 	// the network itself
 	private static ArrayList<Layer> network;
@@ -66,7 +66,7 @@ public class Driver {
 			Driver.sample = Driver.getSample((int)Math.pow(1.8, Driver.numInNodes) * 100000);
 			
 			Driver.buildNetwork();
-			Driver.crossValidation(5);
+			Driver.crossValidation(10);
 		}
 		catch(Exception e){
 			System.out.println("Error...");
@@ -91,7 +91,7 @@ public class Driver {
 			int rangeScale = 10;
 			ArrayList<Double> inputs = new ArrayList<Double>();
 			for(int inputIter = 0; inputIter < Driver.numInNodes; inputIter++ ) {
-				inputs.add(inputIter, Math.random() * Math.pow(-1, (int)Math.random() * 2) * rangeScale);
+				inputs.add(inputIter, Math.random() * Math.pow(-1, (int)(Math.random() * 2)) * rangeScale);
 				outputs[inputIter][setIter] = inputs.get(inputIter);
 			}
 			

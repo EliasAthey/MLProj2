@@ -76,8 +76,8 @@ public class Driver {
 			}
 		}
 		
-		// print some metrics
-		System.out.println("Network has been trained and tested.");
+		// final print stmt
+		System.out.println("\nNetwork has been trained and tested.");
 	}
 	
 	// return a sample dataset of the Rosenbrock function
@@ -274,7 +274,6 @@ public class Driver {
 						
 						//assign sample to input nodes
 						Driver.network.get(0).getNodes()[dimensionIter].inputs[0][0] = Driver.sample[dimensionIter][sampleIter];
-						//System.out.println(sampleIter % k);
 					}
 
 					//set the expected output for this sample point
@@ -357,7 +356,7 @@ public class Driver {
 			
 			// save convergence time (really just training time)
 			Driver.convergenceTime = System.currentTimeMillis() - startTime;
-			System.out.println("\nFold trained in: " + Driver.convergenceTime + " ms.");
+			System.out.println("\nFold " + (trainIter + 1) + " trained in: " + Driver.convergenceTime + " ms.");
 			
 			//test data after every train and determine average error
 			double averageError[] = new double[Driver.numOutNodes];
@@ -381,14 +380,11 @@ public class Driver {
 					// sum average error
 					averageError[0] += (networkOutput[0] - Driver.expectedOutput);
 				}
-				
-				//TODO
-				//store outputs to use for convergence slope results graph thing
 			}
 
 			// compute average error for this fold, if it has increased, revert the weights
 			averageError[0] = averageError[0] / (Driver.sample[0].length / k);
-			System.out.println(averageError[0]);
+			System.out.println("Average error for fold " + (trainIter + 1) + ": " + averageError[0]);
 		}
 	}
 	
